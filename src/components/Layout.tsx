@@ -9,7 +9,8 @@ import {
   Video, 
   User, 
   LogOut,
-  Bot
+  Bot,
+  CreditCard
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -29,6 +30,7 @@ const Layout: React.FC<LayoutProps> = ({ children, currentPage, onPageChange }) 
     { name: 'AI Chatbot', id: 'chatbot', icon: Bot },
     { name: 'HR Tools', id: 'hr', icon: Users },
     { name: 'Video Processing', id: 'video', icon: Video },
+    { name: 'Subscription', id: 'subscription', icon: CreditCard },
     { name: 'Profile', id: 'profile', icon: User },
   ];
 

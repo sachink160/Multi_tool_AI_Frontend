@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { User, Mail, Calendar, Settings, Activity, FileText, MessageSquare, Video, Users } from 'lucide-react';
+import { User, Mail, Calendar, Settings, Activity, FileText, MessageSquare, Video, Users, CreditCard, Crown } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiService } from '../../services/api';
+import { UserProfile, UsageInfo } from '../../types';
 
 const ProfilePage: React.FC = () => {
   const { user } = useAuth();
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [stats, setStats] = useState({
     documents: 0,
     hrDocuments: 0,
@@ -14,15 +16,17 @@ const ProfilePage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchUserStats = async () => {
+    const fetchUserData = async () => {
       try {
-        const [documents, hrDocuments, videos, chatHistory] = await Promise.all([
+        const [profile, documents, hrDocuments, videos, chatHistory] = await Promise.all([
+          apiService.getUserProfile().catch(() => null),
           apiService.getDocuments().catch(() => []),
           apiService.getHRDocuments().catch(() => []),
           apiService.getUploadedVideos().catch(() => []),
           apiService.getChatHistory().catch(() => []),
         ]);
 
+        setUserProfile(profile);
         setStats({
           documents: documents.length,
           hrDocuments: hrDocuments.length,
@@ -30,13 +34,13 @@ const ProfilePage: React.FC = () => {
           chats: chatHistory.length,
         });
       } catch (error) {
-        console.error('Failed to fetch user stats:', error);
+        console.error('Failed to fetch user data:', error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchUserStats();
+    fetchUserData();
   }, []);
 
   const formatDate = (dateString: string) => {
@@ -94,6 +98,59 @@ const ProfilePage: React.FC = () => {
               <h2 className="text-xl font-semibold text-gray-900">Profile Information</h2>
               <Settings className="h-5 w-5 text-gray-400" />
             </div>
+
+            {/* Subscription Status */}
+            {userProfile && (
+              <div className="mb-6 p-4 rounded-lg border">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-lg font-semibold text-gray-900">Subscription Status</h3>
+                  {userProfile.is_subscribed ? (
+                    <span className="flex items-center text-green-600 font-medium">
+                      <Crown className="h-5 w-5 mr-2" />
+                      Subscribed
+                    </span>
+                  ) : (
+                    <span className="flex items-center text-gray-600 font-medium">
+                      <CreditCard className="h-5 w-5 mr-2" />
+                      Free Tier
+                    </span>
+                  )}
+                </div>
+                
+                {userProfile.is_subscribed && userProfile.subscription_end_date && (
+                  <p className="text-sm text-gray-600 mb-3">
+                    Valid until: {formatDate(userProfile.subscription_end_date)}
+                  </p>
+                )}
+                
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-blue-600">
+                      {userProfile.current_usage.chats_used}/{userProfile.current_usage.max_chats}
+                    </div>
+                    <div className="text-gray-600">AI Chats</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-green-600">
+                      {userProfile.current_usage.documents_uploaded}/{userProfile.current_usage.max_documents}
+                    </div>
+                    <div className="text-gray-600">Documents</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-purple-600">
+                      {userProfile.current_usage.hr_documents_uploaded}/{userProfile.current_usage.max_hr_documents}
+                    </div>
+                    <div className="text-gray-600">HR Documents</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-orange-600">
+                      {userProfile.current_usage.video_uploads}/{userProfile.current_usage.max_video_uploads}
+                    </div>
+                    <div className="text-gray-600">Videos</div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="space-y-6">
               {/* Profile Picture and Basic Info */}

@@ -4,12 +4,65 @@ export interface User {
   email: string;
   created_at: string;
   updated_at: string;
+  fullname?: string;
+  phone?: string;
+  user_type?: string;
+  is_subscribed?: boolean;
+  subscription_end_date?: string;
 }
 
 export interface AuthTokens {
   access_token: string;
   refresh_token: string;
   token_type: string;
+}
+
+// Subscription related types
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  price: number;
+  duration_days: number;
+  max_chats_per_month: number;
+  max_documents: number;
+  max_hr_documents: number;
+  max_video_uploads: number;
+  features: string;
+  is_active: boolean;
+}
+
+export interface UserSubscription {
+  id: string;
+  plan_name: string;
+  start_date: string;
+  end_date: string;
+  status: string;
+  payment_status: string;
+  features: string;
+}
+
+export interface UsageInfo {
+  month_year: string;
+  chats_used: number;
+  documents_uploaded: number;
+  hr_documents_uploaded: number;
+  video_uploads: number;
+  max_chats: number;
+  max_documents: number;
+  max_hr_documents: number;
+  max_video_uploads: number;
+}
+
+export interface UserProfile {
+  id: string;
+  username: string;
+  fullname: string;
+  email: string;
+  phone: string;
+  user_type: string;
+  is_subscribed: boolean;
+  subscription_end_date?: string;
+  current_usage: UsageInfo;
 }
 
 export interface Document {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Layout from './components/Layout';
 import LoginPage from './components/pages/LoginPage';
@@ -8,10 +8,17 @@ import ChatbotPage from './components/pages/ChatbotPage';
 import HRPage from './components/pages/HRPage';
 import VideoPage from './components/pages/VideoPage';
 import ProfilePage from './components/pages/ProfilePage';
+import SubscriptionPage from './components/pages/SubscriptionPage';
 
 const AppContent: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
   const [currentPage, setCurrentPage] = useState('dashboard');
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  // Function to trigger dashboard refresh
+  const handleSubscriptionChange = useCallback(() => {
+    setRefreshKey(prev => prev + 1);
+  }, []);
 
   if (isLoading) {
     return (
@@ -31,7 +38,7 @@ const AppContent: React.FC = () => {
   const renderCurrentPage = () => {
     switch (currentPage) {
       case 'dashboard':
-        return <DashboardPage />;
+        return <DashboardPage key={refreshKey} />;
       case 'documents':
         return <DocumentsPage />;
       case 'chatbot':
@@ -42,8 +49,10 @@ const AppContent: React.FC = () => {
         return <VideoPage />;
       case 'profile':
         return <ProfilePage />;
+      case 'subscription':
+        return <SubscriptionPage onSubscriptionChange={handleSubscriptionChange} />;
       default:
-        return <DashboardPage />;
+        return <DashboardPage key={refreshKey} />;
     }
   };
 

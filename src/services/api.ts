@@ -1,4 +1,4 @@
-import { AuthTokens, User, Document, HRDocument, ChatMessage, VideoFile, ProcessedFile, BackendChatHistory } from '../types';
+import { AuthTokens, User, Document, HRDocument, ChatMessage, VideoFile, ProcessedFile, BackendChatHistory, UserProfile, SubscriptionPlan, UserSubscription, UsageInfo } from '../types';
 
 // const API_BASE_URL = 'https://9b3fe599ffc6.ngrok-free.app/';
 const API_BASE_URL = 'http://localhost:8000';
@@ -292,6 +292,36 @@ class APIService {
   // User profile
   async getCurrentUser(): Promise<User> {
     return this.request('/profile');
+  }
+
+  async getUserProfile(): Promise<UserProfile> {
+    return this.request('/profile');
+  }
+
+  // Subscription endpoints
+  async getSubscriptionPlans(): Promise<SubscriptionPlan[]> {
+    return this.request('/plans');
+  }
+
+  async getUserSubscription(): Promise<UserSubscription> {
+    return this.request('/user/subscription');
+  }
+
+  async getUserUsage(): Promise<UsageInfo> {
+    return this.request('/user/usage');
+  }
+
+  async subscribeToPlan(planId: string): Promise<{ message: string; plan_name: string; end_date: string; features: string }> {
+    return this.request('/subscribe', {
+      method: 'POST',
+      body: JSON.stringify({ plan_id: planId }),
+    });
+  }
+
+  async cancelSubscription(): Promise<{ message: string }> {
+    return this.request('/cancel', {
+      method: 'POST',
+    });
   }
 }
 
