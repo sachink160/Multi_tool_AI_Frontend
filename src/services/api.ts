@@ -255,8 +255,8 @@ class APIService {
   }
 
   async getUploadedVideos(): Promise<VideoFile[]> {
-    const res: any = await this.request('/video-to-audio/uploads');
-    // res.uploads is an array of filenames
+  const res = await this.request<{ uploads?: string[] }>('/video-to-audio/uploads');
+  // res.uploads is an array of filenames
     // We'll fake the upload_date and size since backend doesn't provide them
     return (res.uploads || []).map((filename: string) => ({
       filename,
@@ -266,8 +266,8 @@ class APIService {
   }
 
   async getProcessedFiles(): Promise<ProcessedFile[]> {
-    const res: any = await this.request('/video-to-audio/processed');
-    // res.processed is an array of filenames
+  const res = await this.request<{ processed?: string[] }>('/video-to-audio/processed');
+  // res.processed is an array of filenames
     // We'll infer type from extension and fake processed_date/size
     return (res.processed || []).map((filename: string) => ({
       filename,
@@ -305,6 +305,10 @@ class APIService {
 
   async getUserSubscription(): Promise<UserSubscription> {
     return this.request('/user/subscription');
+  }
+
+  async getUserSubscriptionHistory(): Promise<UserSubscription[]> {
+    return this.request('/user/subscription/history');
   }
 
   async getUserUsage(): Promise<UsageInfo> {

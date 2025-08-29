@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Check, Crown, Star, Zap, AlertCircle } from 'lucide-react';
 import { apiService } from '../../services/api';
 import { SubscriptionPlan, UserSubscription, UsageInfo } from '../../types';
@@ -11,15 +11,31 @@ const SubscriptionPage: React.FC<SubscriptionPageProps> = ({ onSubscriptionChang
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [currentSubscription, setCurrentSubscription] = useState<UserSubscription | null>(null);
   const [usage, setUsage] = useState<UsageInfo | null>(null);
+  const [history, setHistory] = useState<UserSubscription[] | null>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [subscribing, setSubscribing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadSubscriptionData();
+
+  const loadSubscriptionHistory = useCallback(async () => {
+    setHistoryLoading(true);
+    setHistoryError(null);
+    try {
+      const hist = await apiService.getUserSubscriptionHistory();
+      setHistory(hist);
+    } catch (err) {
+      console.error('Failed to load subscription history:', err);
+      const message = err instanceof Error ? err.message : 'Failed to load history';
+      setHistoryError(message);
+      setHistory([]);
+    } finally {
+      setHistoryLoading(false);
+    }
   }, []);
 
-  const loadSubscriptionData = async () => {
+  const loadSubscriptionData = useCallback(async () => {
     try {
       setError(null);
       const [plansData, usageData] = await Promise.all([
@@ -34,17 +50,26 @@ const SubscriptionPage: React.FC<SubscriptionPageProps> = ({ onSubscriptionChang
       try {
         const subscriptionData = await apiService.getUserSubscription();
         setCurrentSubscription(subscriptionData);
-      } catch (error) {
-        // User might not have a subscription
+      } catch {
+        // User might not have a subscription or token issue
         setCurrentSubscription(null);
       }
+
+    // Load subscription history (non-blocking for main data)
+    loadSubscriptionHistory();
     } catch (error) {
       console.error('Error loading subscription data:', error);
       setError('Failed to load subscription data. Please try again.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [loadSubscriptionHistory]);
+
+  useEffect(() => {
+    loadSubscriptionData();
+  }, [loadSubscriptionData]);
+
+  
 
   const handleSubscribe = async (planId: string) => {
     setSubscribing(true);
@@ -64,9 +89,9 @@ const SubscriptionPage: React.FC<SubscriptionPageProps> = ({ onSubscriptionChang
       // Optionally redirect to dashboard
       // window.location.href = '/dashboard';
       
-    } catch (error: any) {
-      console.error('Error subscribing:', error);
-      const errorMessage = error.message || 'Failed to subscribe. Please try again.';
+    } catch (err) {
+      console.error('Error subscribing:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to subscribe. Please try again.';
       setError(errorMessage);
       alert(errorMessage);
     } finally {
@@ -92,9 +117,9 @@ const SubscriptionPage: React.FC<SubscriptionPageProps> = ({ onSubscriptionChang
         onSubscriptionChange();
       }
       
-    } catch (error: any) {
-      console.error('Error cancelling subscription:', error);
-      const errorMessage = error.message || 'Failed to cancel subscription. Please try again.';
+    } catch (err) {
+      console.error('Error cancelling subscription:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to cancel subscription. Please try again.';
       setError(errorMessage);
       alert(errorMessage);
     }
@@ -291,6 +316,54 @@ const SubscriptionPage: React.FC<SubscriptionPageProps> = ({ onSubscriptionChang
                 <div className="text-gray-600">Video</div>
               </div>
             </div>
+          </div>
+        </div>
+        
+        {/* Subscription History */}
+        <div className="mt-12">
+          <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-semibold text-gray-900">Subscription History</h3>
+              <button
+                onClick={loadSubscriptionHistory}
+                className="text-sm text-blue-600 hover:underline"
+                disabled={historyLoading}
+              >
+                {historyLoading ? 'Refreshing...' : 'Refresh'}
+              </button>
+            </div>
+
+            {historyLoading && <div className="text-gray-600">Loading history...</div>}
+            {historyError && <div className="text-red-600">{historyError}</div>}
+
+            {!historyLoading && history && history.length === 0 && (
+              <div className="text-gray-600">No subscription history available.</div>
+            )}
+
+            {!historyLoading && history && history.length > 0 && (
+              <div className="space-y-4">
+                {history.map((h) => (
+                  <div key={h.id} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-sm text-gray-500">Plan</div>
+                        <div className="text-lg font-medium">{h.plan_name || '—'}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm text-gray-500">Status</div>
+                        <div className="text-lg">{h.status}</div>
+                      </div>
+                    </div>
+                    <div className="mt-3 grid grid-cols-2 gap-4 text-sm text-gray-600">
+                      <div>Start: {h.start_date ? new Date(h.start_date).toLocaleString() : '—'}</div>
+                      <div>End: {h.end_date ? new Date(h.end_date).toLocaleString() : '—'}</div>
+                      <div>Payment: {h.payment_status}</div>
+                      <div>Features: {h.features || '—'}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
