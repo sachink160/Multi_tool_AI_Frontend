@@ -10,7 +10,8 @@ import {
   User, 
   LogOut,
   Bot,
-  CreditCard
+  CreditCard,
+  Zap
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -28,6 +29,7 @@ const Layout: React.FC<LayoutProps> = ({ children, currentPage, onPageChange }) 
     { name: 'Dashboard', id: 'dashboard', icon: Home },
     { name: 'Document Q&A', id: 'documents', icon: FileText },
     { name: 'AI Chatbot', id: 'chatbot', icon: Bot },
+    { name: 'Dynamic Prompts', id: 'dynamic-prompts', icon: Zap },
     { name: 'HR Tools', id: 'hr', icon: Users },
     { name: 'Video Processing', id: 'video', icon: Video },
     { name: 'Subscription', id: 'subscription', icon: CreditCard },

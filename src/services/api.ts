@@ -1,4 +1,4 @@
-import { AuthTokens, User, Document, HRDocument, ChatMessage, VideoFile, ProcessedFile, BackendChatHistory, UserProfile, SubscriptionPlan, UserSubscription, UsageInfo } from '../types';
+import { AuthTokens, User, Document, HRDocument, ChatMessage, VideoFile, ProcessedFile, BackendChatHistory, UserProfile, SubscriptionPlan, UserSubscription, UsageInfo, DynamicPrompt, DynamicPromptCreate, DynamicPromptUpdate, ProcessedDocument, DocumentProcessResult } from '../types';
 
 // const API_BASE_URL = 'https://9b3fe599ffc6.ngrok-free.app/';
 const API_BASE_URL = 'http://localhost:8000';
@@ -326,6 +326,66 @@ class APIService {
     return this.request('/cancel', {
       method: 'POST',
     });
+  }
+
+  // Dynamic Prompt endpoints
+  async createDynamicPrompt(promptData: DynamicPromptCreate): Promise<DynamicPrompt> {
+    return this.request('/dynamic-prompts/', {
+      method: 'POST',
+      body: JSON.stringify(promptData),
+    });
+  }
+
+  async getDynamicPrompts(): Promise<DynamicPrompt[]> {
+    return this.request('/dynamic-prompts/');
+  }
+
+  async getDynamicPrompt(promptId: string): Promise<DynamicPrompt> {
+    return this.request(`/dynamic-prompts/${promptId}`);
+  }
+
+  async updateDynamicPrompt(promptId: string, promptData: DynamicPromptUpdate): Promise<DynamicPrompt> {
+    return this.request(`/dynamic-prompts/${promptId}`, {
+      method: 'PUT',
+      body: JSON.stringify(promptData),
+    });
+  }
+
+  async deleteDynamicPrompt(promptId: string): Promise<{ message: string }> {
+    return this.request(`/dynamic-prompts/${promptId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async uploadDocumentWithPrompt(file: File, promptId: string): Promise<{ message: string; processed_document_id: string; status: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('prompt_id', promptId);
+
+    const response = await fetch(`${API_BASE_URL}/dynamic-prompts/upload-document`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Document upload failed');
+    }
+
+    return response.json();
+  }
+
+  async getProcessedDocuments(): Promise<ProcessedDocument[]> {
+    return this.request('/dynamic-prompts/processed-documents/');
+  }
+
+  async getProcessedDocument(documentId: string): Promise<ProcessedDocument> {
+    return this.request(`/dynamic-prompts/processed-documents/${documentId}`);
+  }
+
+  async getProcessingResult(documentId: string): Promise<DocumentProcessResult> {
+    return this.request(`/dynamic-prompts/processed-documents/${documentId}/result`);
   }
 }
 

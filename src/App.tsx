@@ -5,6 +5,7 @@ import LoginPage from './components/pages/LoginPage';
 import DashboardPage from './components/pages/DashboardPage';
 import DocumentsPage from './components/pages/DocumentsPage';
 import ChatbotPage from './components/pages/ChatbotPage';
+import DynamicPromptsPage from './components/pages/DynamicPromptsPage';
 import HRPage from './components/pages/HRPage';
 import VideoPage from './components/pages/VideoPage';
 import ProfilePage from './components/pages/ProfilePage';
@@ -43,6 +44,8 @@ const AppContent: React.FC = () => {
         return <DocumentsPage />;
       case 'chatbot':
         return <ChatbotPage />;
+      case 'dynamic-prompts':
+        return <DynamicPromptsPage />;
       case 'hr':
         return <HRPage />;
       case 'video':

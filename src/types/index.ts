@@ -124,3 +124,46 @@ export interface APIResponse<T> {
   message?: string;
   status: 'success' | 'error';
 }
+
+// Dynamic Prompt types
+export interface DynamicPrompt {
+  id: string;
+  name: string;
+  description?: string;
+  prompt_template: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DynamicPromptCreate {
+  name: string;
+  description?: string;
+  prompt_template: string;
+}
+
+export interface DynamicPromptUpdate {
+  name?: string;
+  description?: string;
+  prompt_template?: string;
+  is_active?: boolean;
+}
+
+export interface ProcessedDocument {
+  id: string;
+  prompt_id: string;
+  original_filename: string;
+  file_type: string;
+  processing_status: 'pending' | 'processing' | 'completed' | 'failed';
+  extracted_text?: string;
+  processed_result?: string;
+  error_message?: string;
+  created_at: string;
+}
+
+export interface DocumentProcessResult {
+  document_id: string;
+  original_filename: string;
+  processing_status: string;
+  result: any;
+}
