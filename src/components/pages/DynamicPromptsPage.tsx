@@ -1,7 +1,217 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { apiService } from '../../services/api';
 import { DynamicPrompt, DynamicPromptCreate, ProcessedDocument, DocumentProcessResult } from '../../types';
-import { Upload, FileText, CheckCircle, XCircle, Clock, AlertCircle, Download, Eye, Trash2, Edit3, Plus, Zap } from 'lucide-react';
+import { Upload, FileText, CheckCircle, XCircle, Clock, AlertCircle, Download, Eye, Trash2, Edit3, Plus, Zap, Copy, ChevronDown, ChevronRight } from 'lucide-react';
+
+// Component to render formatted results
+const FormattedResultRenderer: React.FC<{ result: any }> = ({ result }) => {
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+  const [viewMode, setViewMode] = useState<'formatted' | 'raw'>('formatted');
+  const [expandAll, setExpandAll] = useState(false);
+
+  const toggleSection = (sectionKey: string) => {
+    const newExpanded = new Set(expandedSections);
+    if (newExpanded.has(sectionKey)) {
+      newExpanded.delete(sectionKey);
+    } else {
+      newExpanded.add(sectionKey);
+    }
+    setExpandedSections(newExpanded);
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+  };
+
+  const toggleExpandAll = () => {
+    if (expandAll) {
+      setExpandedSections(new Set());
+    } else {
+      // Expand all sections
+      const allSections = new Set<string>();
+      if (result.raw_output) {
+        const sections = result.raw_output.split(/##\s+/).filter((section: string) => section.trim());
+        sections.forEach((_: string, index: number) => {
+          allSections.add(`section-${index}`);
+        });
+      } else {
+        Object.keys(result).forEach(key => {
+          allSections.add(key);
+        });
+      }
+      setExpandedSections(allSections);
+    }
+    setExpandAll(!expandAll);
+  };
+
+  const formatRawOutput = (rawOutput: string) => {
+    if (!rawOutput) return null;
+    
+    // Split by sections (## headings)
+    const sections = rawOutput.split(/##\s+/).filter(section => section.trim());
+    
+    return sections.map((section, index) => {
+      const lines = section.split('\n').filter(line => line.trim());
+      const title = lines[0]?.trim();
+      const content = lines.slice(1);
+      
+      if (!title) return null;
+      
+      return (
+        <div key={index} className="mb-6 border border-gray-200 rounded-lg">
+          <button
+            onClick={() => toggleSection(`section-${index}`)}
+            className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors rounded-t-lg"
+          >
+            <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
+            {expandedSections.has(`section-${index}`) ? 
+              <ChevronDown className="h-5 w-5 text-gray-600" /> : 
+              <ChevronRight className="h-5 w-5 text-gray-600" />
+            }
+          </button>
+          
+          {expandedSections.has(`section-${index}`) && (
+            <div className="p-4 bg-white">
+              {content.map((line, lineIndex) => {
+                const trimmedLine = line.trim();
+                if (!trimmedLine) return null;
+                
+                if (trimmedLine.startsWith('**') && trimmedLine.endsWith('**')) {
+                  return (
+                    <h4 key={lineIndex} className="font-semibold text-gray-700 mt-4 mb-2 first:mt-0">
+                      {trimmedLine.replace(/\*\*/g, '')}
+                    </h4>
+                  );
+                } else if (trimmedLine.startsWith('- ')) {
+                  return (
+                    <div key={lineIndex} className="ml-4 mb-2 text-gray-600 flex items-start">
+                      <span className="text-blue-600 mr-2">•</span>
+                      <span>{trimmedLine.replace(/^- /, '')}</span>
+                    </div>
+                  );
+                } else if (trimmedLine.match(/^\d+\./)) {
+                  // Numbered list
+                  return (
+                    <div key={lineIndex} className="ml-4 mb-2 text-gray-600 flex items-start">
+                      <span className="text-blue-600 mr-2 font-medium">{trimmedLine.match(/^\d+\./)?.[0]}</span>
+                      <span>{trimmedLine.replace(/^\d+\.\s*/, '')}</span>
+                    </div>
+                  );
+                } else {
+                  return (
+                    <p key={lineIndex} className="text-gray-600 mb-2 leading-relaxed">
+                      {trimmedLine}
+                    </p>
+                  );
+                }
+              })}
+            </div>
+          )}
+        </div>
+      );
+    });
+  };
+
+  const renderFormattedContent = () => {
+    if (result.raw_output) {
+      return (
+        <div className="space-y-4">
+          <div className="flex justify-between items-center mb-4">
+            <h4 className="text-lg font-semibold text-gray-800">Document Analysis</h4>
+            <button
+              onClick={() => copyToClipboard(result.raw_output)}
+              className="flex items-center space-x-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm"
+            >
+              <Copy className="h-4 w-4" />
+              <span>Copy Text</span>
+            </button>
+          </div>
+          {formatRawOutput(result.raw_output)}
+        </div>
+      );
+    }
+
+    // Handle other structured data
+    return Object.entries(result).map(([key, value]) => (
+      <div key={key} className="mb-4 border border-gray-200 rounded-lg">
+        <button
+          onClick={() => toggleSection(key)}
+          className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors rounded-t-lg"
+        >
+          <h3 className="text-lg font-semibold text-gray-800 capitalize">{key.replace(/_/g, ' ')}</h3>
+          {expandedSections.has(key) ? 
+            <ChevronDown className="h-5 w-5 text-gray-600" /> : 
+            <ChevronRight className="h-5 w-5 text-gray-600" />
+          }
+        </button>
+        
+        {expandedSections.has(key) && (
+          <div className="p-4 bg-white">
+            {typeof value === 'object' ? (
+              <pre className="whitespace-pre-wrap text-sm text-gray-800">
+                {JSON.stringify(value, null, 2)}
+              </pre>
+            ) : (
+              <p className="text-gray-600">{String(value)}</p>
+            )}
+          </div>
+        )}
+      </div>
+    ));
+  };
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex space-x-2">
+          <button
+            onClick={() => setViewMode('formatted')}
+            className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+              viewMode === 'formatted' 
+                ? 'bg-blue-600 text-white' 
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            Formatted View
+          </button>
+          <button
+            onClick={() => setViewMode('raw')}
+            className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+              viewMode === 'raw' 
+                ? 'bg-blue-600 text-white' 
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            Raw JSON
+          </button>
+          {viewMode === 'formatted' && (
+            <button
+              onClick={toggleExpandAll}
+              className="px-3 py-1 rounded-lg text-sm font-medium bg-green-100 text-green-700 hover:bg-green-200 transition-colors"
+            >
+              {expandAll ? 'Collapse All' : 'Expand All'}
+            </button>
+          )}
+        </div>
+        <span className="text-xs text-gray-500">
+          {Object.keys(result).length} top-level keys
+        </span>
+      </div>
+
+      {viewMode === 'formatted' ? (
+        <div className="space-y-4">
+          {renderFormattedContent()}
+        </div>
+      ) : (
+        <div className="bg-gray-50 rounded-lg p-4">
+          <pre className="whitespace-pre-wrap text-sm text-gray-800 overflow-x-auto">
+            {JSON.stringify(result, null, 2)}
+          </pre>
+        </div>
+      )}
+    </div>
+  );
+};
 
 // Dynamic Prompts Page Component
 const DynamicPromptsPage: React.FC = () => {
@@ -752,17 +962,7 @@ const DynamicPromptsPage: React.FC = () => {
               </div>
               
               <div className="flex-1 overflow-auto p-6">
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-medium text-gray-900">Structured Data Result</h4>
-                    <span className="text-xs text-gray-500">
-                      {Object.keys(selectedResult.result).length} top-level keys
-                    </span>
-                  </div>
-                  <pre className="whitespace-pre-wrap text-sm text-gray-800 overflow-x-auto">
-                    {JSON.stringify(selectedResult.result, null, 2)}
-                  </pre>
-                </div>
+                <FormattedResultRenderer result={selectedResult.result} />
               </div>
             </div>
           </div>
