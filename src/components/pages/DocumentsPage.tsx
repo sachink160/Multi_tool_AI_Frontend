@@ -77,17 +77,17 @@ const DocumentsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg p-6 border border-white/20">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Document Q&A</h1>
-        <p className="text-gray-600">Upload documents and ask questions using AI-powered analysis</p>
+      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-lg p-6 border border-white/20 dark:border-gray-700/20">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Document Q&A</h1>
+        <p className="text-gray-600 dark:text-gray-300">Upload documents and ask questions using AI-powered analysis</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Documents List */}
         <div className="lg:col-span-1">
-          <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg p-6 border border-white/20">
+          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-lg p-6 border border-white/20 dark:border-gray-700/20">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">Documents</h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Documents</h2>
               <div className="relative">
                 <input
                   type="file"
@@ -98,7 +98,7 @@ const DocumentsPage: React.FC = () => {
                 />
                 <label
                   htmlFor="file-upload"
-                  className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer transition-colors"
+                  className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 cursor-pointer transition-colors"
                 >
                   <Upload className="h-4 w-4" />
                   <span>Upload</span>
@@ -107,23 +107,23 @@ const DocumentsPage: React.FC = () => {
             </div>
 
             {isUploading && (
-              <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+              <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                 <div className="flex items-center space-x-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                  <span className="text-sm text-blue-600">Uploading...</span>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 dark:border-blue-400"></div>
+                  <span className="text-sm text-blue-600 dark:text-blue-400">Uploading...</span>
                 </div>
               </div>
             )}
 
             <div className="space-y-2 max-h-96 overflow-y-auto">
               {isLoading ? (
-                <div className="text-center py-8 text-gray-500">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-2"></div>
                   <p>Loading documents...</p>
                 </div>
               ) : documents.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
                   <p>No documents uploaded yet</p>
                   <p className="text-sm">Upload your first document to get started</p>
                 </div>
@@ -134,18 +134,18 @@ const DocumentsPage: React.FC = () => {
                     onClick={() => setSelectedDocument(doc)}
                     className={`p-3 rounded-lg cursor-pointer transition-colors ${
                       selectedDocument?.id === doc.id
-                        ? 'bg-blue-100 border-2 border-blue-500'
-                        : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
+                        ? 'bg-blue-100 dark:bg-blue-900/50 border-2 border-blue-500 dark:border-blue-400'
+                        : 'bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 border-2 border-transparent'
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <FileText className="h-5 w-5 text-blue-600" />
+                        <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                         <div>
-                          <p className="text-sm font-medium text-gray-900 truncate">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                             {doc.filename.replace(/^[^_]+_/, '')}
                           </p>
-                          <p className="text-xs text-gray-500 flex items-center">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
                             <Clock className="h-3 w-3 mr-1" />
                             {new Date(doc.upload_date).toLocaleDateString()}
                           </p>
@@ -161,13 +161,13 @@ const DocumentsPage: React.FC = () => {
 
         {/* Q&A Interface */}
         <div className="lg:col-span-2">
-          <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg p-6 border border-white/20 h-full">
+          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-lg p-6 border border-white/20 dark:border-gray-700/20 h-full">
             {selectedDocument ? (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-xl font-semibold text-gray-900">Ask Questions</h2>
-                    <p className="text-sm text-gray-600">Selected: {selectedDocument.filename}</p>
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Ask Questions</h2>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Selected: {selectedDocument.filename}</p>
                   </div>
                 </div>
 
@@ -181,8 +181,8 @@ const DocumentsPage: React.FC = () => {
                         onClick={() => setQueryType(type.value)}
                         className={`p-3 rounded-lg border transition-colors ${
                           queryType === type.value
-                            ? 'bg-blue-100 border-blue-500 text-blue-700'
-                            : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                            ? 'bg-blue-100 dark:bg-blue-900/50 border-blue-500 dark:border-blue-400 text-blue-700 dark:text-blue-300'
+                            : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600'
                         }`}
                       >
                         <Icon className="h-4 w-4 mx-auto mb-1" />
@@ -194,7 +194,7 @@ const DocumentsPage: React.FC = () => {
 
                 {/* Question Input */}
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Your Question
                   </label>
                   <div className="relative">
@@ -208,13 +208,13 @@ const DocumentsPage: React.FC = () => {
                         queryType === 'action_items' ? 'Click "Ask" to extract action items...' :
                         'Click "Ask" to identify legal issues...'
                       }`}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                       rows={3}
                     />
                     <button
                       onClick={handleAskQuestion}
                       disabled={isAsking || !question.trim()}
-                      className="absolute bottom-2 right-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="absolute bottom-2 right-2 px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       {isAsking ? (
                         <div className="flex items-center space-x-2">
@@ -231,19 +231,19 @@ const DocumentsPage: React.FC = () => {
                 {/* Response */}
                 {response && (
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Response
                     </label>
-                    <div className="p-4 bg-gray-50 rounded-lg border">
-                      <p className="text-gray-800 whitespace-pre-wrap">{response}</p>
+                    <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                      <p className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{response}</p>
                     </div>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="flex items-center justify-center h-full text-gray-500">
+              <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
                 <div className="text-center">
-                  <MessageSquare className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+                  <MessageSquare className="h-16 w-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
                   <p className="text-lg font-medium">Select a document to start asking questions</p>
                   <p className="text-sm">Upload a document first, then select it to begin the Q&A session</p>
                 </div>

@@ -47,10 +47,12 @@ export interface UsageInfo {
   documents_uploaded: number;
   hr_documents_uploaded: number;
   video_uploads: number;
+  dynamic_prompt_documents_uploaded: number;
   max_chats: number;
   max_documents: number;
   max_hr_documents: number;
   max_video_uploads: number;
+  max_dynamic_prompt_documents: number;
 }
 
 export interface UserProfile {
@@ -131,6 +133,7 @@ export interface DynamicPrompt {
   name: string;
   description?: string;
   prompt_template: string;
+  gpt_model: string;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -140,12 +143,14 @@ export interface DynamicPromptCreate {
   name: string;
   description?: string;
   prompt_template: string;
+  gpt_model?: string;
 }
 
 export interface DynamicPromptUpdate {
   name?: string;
   description?: string;
   prompt_template?: string;
+  gpt_model?: string;
   is_active?: boolean;
 }
 

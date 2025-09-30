@@ -1,7 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { apiService } from '../../services/api';
 import { DynamicPrompt, DynamicPromptCreate, ProcessedDocument, DocumentProcessResult } from '../../types';
-import { Upload, FileText, CheckCircle, XCircle, Clock, AlertCircle, Download, Eye, Trash2, Edit3, Plus, Zap, Copy, ChevronDown, ChevronRight } from 'lucide-react';
+import { Upload, FileText, CheckCircle, XCircle, Clock, AlertCircle, Download, Eye, Trash2, Edit3, Plus, Zap, Copy, ChevronDown, ChevronRight, Cpu } from 'lucide-react';
+
+// Available GPT models
+const AVAILABLE_MODELS = [
+  { id: 'gpt-4o-mini', name: 'GPT-4o Mini', description: 'Fast and cost-effective', price: 'Low' },
+  { id: 'gpt-4o', name: 'GPT-4o', description: 'Most capable model', price: 'High' },
+  { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', description: 'Balanced performance', price: 'Medium' },
+  { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', description: 'Fast and efficient', price: 'Very Low' }
+];
 
 // Component to render formatted results
 const FormattedResultRenderer: React.FC<{ result: any }> = ({ result }) => {
@@ -58,48 +66,48 @@ const FormattedResultRenderer: React.FC<{ result: any }> = ({ result }) => {
       if (!title) return null;
       
       return (
-        <div key={index} className="mb-6 border border-gray-200 rounded-lg">
+        <div key={index} className="mb-6 border border-gray-200 dark:border-gray-700 rounded-lg">
           <button
             onClick={() => toggleSection(`section-${index}`)}
-            className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors rounded-t-lg"
+            className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors rounded-t-lg"
           >
-            <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">{title}</h3>
             {expandedSections.has(`section-${index}`) ? 
-              <ChevronDown className="h-5 w-5 text-gray-600" /> : 
-              <ChevronRight className="h-5 w-5 text-gray-600" />
+              <ChevronDown className="h-5 w-5 text-gray-600 dark:text-gray-400" /> : 
+              <ChevronRight className="h-5 w-5 text-gray-600 dark:text-gray-400" />
             }
           </button>
           
           {expandedSections.has(`section-${index}`) && (
-            <div className="p-4 bg-white">
+            <div className="p-4 bg-white dark:bg-gray-800">
               {content.map((line, lineIndex) => {
                 const trimmedLine = line.trim();
                 if (!trimmedLine) return null;
                 
                 if (trimmedLine.startsWith('**') && trimmedLine.endsWith('**')) {
                   return (
-                    <h4 key={lineIndex} className="font-semibold text-gray-700 mt-4 mb-2 first:mt-0">
+                    <h4 key={lineIndex} className="font-semibold text-gray-700 dark:text-gray-300 mt-4 mb-2 first:mt-0">
                       {trimmedLine.replace(/\*\*/g, '')}
                     </h4>
                   );
                 } else if (trimmedLine.startsWith('- ')) {
                   return (
-                    <div key={lineIndex} className="ml-4 mb-2 text-gray-600 flex items-start">
-                      <span className="text-blue-600 mr-2">•</span>
+                    <div key={lineIndex} className="ml-4 mb-2 text-gray-600 dark:text-gray-400 flex items-start">
+                      <span className="text-blue-600 dark:text-blue-400 mr-2">•</span>
                       <span>{trimmedLine.replace(/^- /, '')}</span>
                     </div>
                   );
                 } else if (trimmedLine.match(/^\d+\./)) {
                   // Numbered list
                   return (
-                    <div key={lineIndex} className="ml-4 mb-2 text-gray-600 flex items-start">
-                      <span className="text-blue-600 mr-2 font-medium">{trimmedLine.match(/^\d+\./)?.[0]}</span>
+                    <div key={lineIndex} className="ml-4 mb-2 text-gray-600 dark:text-gray-400 flex items-start">
+                      <span className="text-blue-600 dark:text-blue-400 mr-2 font-medium">{trimmedLine.match(/^\d+\./)?.[0]}</span>
                       <span>{trimmedLine.replace(/^\d+\.\s*/, '')}</span>
                     </div>
                   );
                 } else {
                   return (
-                    <p key={lineIndex} className="text-gray-600 mb-2 leading-relaxed">
+                    <p key={lineIndex} className="text-gray-600 dark:text-gray-400 mb-2 leading-relaxed">
                       {trimmedLine}
                     </p>
                   );
@@ -117,10 +125,10 @@ const FormattedResultRenderer: React.FC<{ result: any }> = ({ result }) => {
       return (
         <div className="space-y-4">
           <div className="flex justify-between items-center mb-4">
-            <h4 className="text-lg font-semibold text-gray-800">Document Analysis</h4>
+            <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Document Analysis</h4>
             <button
               onClick={() => copyToClipboard(result.raw_output)}
-              className="flex items-center space-x-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm"
+              className="flex items-center space-x-1 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors text-sm"
             >
               <Copy className="h-4 w-4" />
               <span>Copy Text</span>
@@ -133,26 +141,26 @@ const FormattedResultRenderer: React.FC<{ result: any }> = ({ result }) => {
 
     // Handle other structured data
     return Object.entries(result).map(([key, value]) => (
-      <div key={key} className="mb-4 border border-gray-200 rounded-lg">
+      <div key={key} className="mb-4 border border-gray-200 dark:border-gray-700 rounded-lg">
         <button
           onClick={() => toggleSection(key)}
-          className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors rounded-t-lg"
+          className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors rounded-t-lg"
         >
-          <h3 className="text-lg font-semibold text-gray-800 capitalize">{key.replace(/_/g, ' ')}</h3>
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 capitalize">{key.replace(/_/g, ' ')}</h3>
           {expandedSections.has(key) ? 
-            <ChevronDown className="h-5 w-5 text-gray-600" /> : 
-            <ChevronRight className="h-5 w-5 text-gray-600" />
+            <ChevronDown className="h-5 w-5 text-gray-600 dark:text-gray-400" /> : 
+            <ChevronRight className="h-5 w-5 text-gray-600 dark:text-gray-400" />
           }
         </button>
         
         {expandedSections.has(key) && (
-          <div className="p-4 bg-white">
+          <div className="p-4 bg-white dark:bg-gray-800">
             {typeof value === 'object' ? (
-              <pre className="whitespace-pre-wrap text-sm text-gray-800">
+              <pre className="whitespace-pre-wrap text-sm text-gray-800 dark:text-gray-200">
                 {JSON.stringify(value, null, 2)}
               </pre>
             ) : (
-              <p className="text-gray-600">{String(value)}</p>
+              <p className="text-gray-600 dark:text-gray-400">{String(value)}</p>
             )}
           </div>
         )}
@@ -168,8 +176,8 @@ const FormattedResultRenderer: React.FC<{ result: any }> = ({ result }) => {
             onClick={() => setViewMode('formatted')}
             className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
               viewMode === 'formatted' 
-                ? 'bg-blue-600 text-white' 
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                ? 'bg-blue-600 dark:bg-blue-500 text-white' 
+                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
             }`}
           >
             Formatted View
@@ -178,8 +186,8 @@ const FormattedResultRenderer: React.FC<{ result: any }> = ({ result }) => {
             onClick={() => setViewMode('raw')}
             className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
               viewMode === 'raw' 
-                ? 'bg-blue-600 text-white' 
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                ? 'bg-blue-600 dark:bg-blue-500 text-white' 
+                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
             }`}
           >
             Raw JSON
@@ -187,13 +195,13 @@ const FormattedResultRenderer: React.FC<{ result: any }> = ({ result }) => {
           {viewMode === 'formatted' && (
             <button
               onClick={toggleExpandAll}
-              className="px-3 py-1 rounded-lg text-sm font-medium bg-green-100 text-green-700 hover:bg-green-200 transition-colors"
+              className="px-3 py-1 rounded-lg text-sm font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors"
             >
               {expandAll ? 'Collapse All' : 'Expand All'}
             </button>
           )}
         </div>
-        <span className="text-xs text-gray-500">
+        <span className="text-xs text-gray-500 dark:text-gray-400">
           {Object.keys(result).length} top-level keys
         </span>
       </div>
@@ -203,8 +211,8 @@ const FormattedResultRenderer: React.FC<{ result: any }> = ({ result }) => {
           {renderFormattedContent()}
         </div>
       ) : (
-        <div className="bg-gray-50 rounded-lg p-4">
-          <pre className="whitespace-pre-wrap text-sm text-gray-800 overflow-x-auto">
+        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+          <pre className="whitespace-pre-wrap text-sm text-gray-800 dark:text-gray-200 overflow-x-auto">
             {JSON.stringify(result, null, 2)}
           </pre>
         </div>
@@ -217,6 +225,7 @@ const FormattedResultRenderer: React.FC<{ result: any }> = ({ result }) => {
 const DynamicPromptsPage: React.FC = () => {
   const [prompts, setPrompts] = useState<DynamicPrompt[]>([]);
   const [processedDocs, setProcessedDocs] = useState<ProcessedDocument[]>([]);
+  const [usage, setUsage] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -228,7 +237,8 @@ const DynamicPromptsPage: React.FC = () => {
   const [formData, setFormData] = useState<DynamicPromptCreate>({
     name: '',
     description: '',
-    prompt_template: ''
+    prompt_template: '',
+    gpt_model: 'gpt-4o-mini'
   });
   
   // Document upload states
@@ -251,12 +261,14 @@ const DynamicPromptsPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const [promptsData, docsData] = await Promise.all([
+      const [promptsData, docsData, usageData] = await Promise.all([
         apiService.getDynamicPrompts(),
-        apiService.getProcessedDocuments()
+        apiService.getProcessedDocuments(),
+        apiService.getUserUsage().catch(() => null) // Don't fail if usage can't be loaded
       ]);
       setPrompts(promptsData);
       setProcessedDocs(docsData);
+      setUsage(usageData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load data');
     } finally {
@@ -270,7 +282,7 @@ const DynamicPromptsPage: React.FC = () => {
       setError(null);
       const newPrompt = await apiService.createDynamicPrompt(formData);
       setPrompts([newPrompt, ...prompts]);
-      setFormData({ name: '', description: '', prompt_template: '' });
+      setFormData({ name: '', description: '', prompt_template: '', gpt_model: 'gpt-4o-mini' });
       setShowCreateForm(false);
       setSuccess('Prompt created successfully!');
       setTimeout(() => setSuccess(null), 3000);
@@ -288,7 +300,7 @@ const DynamicPromptsPage: React.FC = () => {
       const updatedPrompt = await apiService.updateDynamicPrompt(editingPrompt.id, formData);
       setPrompts(prompts.map(p => p.id === editingPrompt.id ? updatedPrompt : p));
       setEditingPrompt(null);
-      setFormData({ name: '', description: '', prompt_template: '' });
+      setFormData({ name: '', description: '', prompt_template: '', gpt_model: 'gpt-4o-mini' });
       setSuccess('Prompt updated successfully!');
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
@@ -452,42 +464,43 @@ const DynamicPromptsPage: React.FC = () => {
     setFormData({
       name: prompt.name,
       description: prompt.description || '',
-      prompt_template: prompt.prompt_template
+      prompt_template: prompt.prompt_template,
+      gpt_model: prompt.gpt_model
     });
   };
 
   const cancelEdit = () => {
     setEditingPrompt(null);
-    setFormData({ name: '', description: '', prompt_template: '' });
+    setFormData({ name: '', description: '', prompt_template: '', gpt_model: 'gpt-4o-mini' });
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-300">Loading...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6">
       <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center space-x-3">
-              <Zap className="h-8 w-8 text-blue-600" />
-              <h1 className="text-3xl font-bold text-gray-800">Dynamic Prompts</h1>
+              <Zap className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+              <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Dynamic Prompts</h1>
             </div>
             <div className="flex space-x-2">
               <button
                 onClick={() => setActiveTab('prompts')}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                   activeTab === 'prompts'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    ? 'bg-blue-600 dark:bg-blue-500 text-white'
+                    : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
                 }`}
               >
                 Prompts
@@ -496,8 +509,8 @@ const DynamicPromptsPage: React.FC = () => {
                 onClick={() => setActiveTab('documents')}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                   activeTab === 'documents'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    ? 'bg-blue-600 dark:bg-blue-500 text-white'
+                    : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
                 }`}
               >
                 Process Documents
@@ -506,14 +519,14 @@ const DynamicPromptsPage: React.FC = () => {
           </div>
 
           {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 flex items-center">
+            <div className="bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded mb-4 flex items-center">
               <AlertCircle className="h-5 w-5 mr-2" />
               {error}
             </div>
           )}
 
           {success && (
-            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 flex items-center">
+            <div className="bg-green-100 dark:bg-green-900/20 border border-green-400 dark:border-green-800 text-green-700 dark:text-green-300 px-4 py-3 rounded mb-4 flex items-center">
               <CheckCircle className="h-5 w-5 mr-2" />
               {success}
             </div>
@@ -522,10 +535,10 @@ const DynamicPromptsPage: React.FC = () => {
           {activeTab === 'prompts' && (
             <div>
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-gray-700">Your Prompts</h2>
+                <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300">Your Prompts</h2>
                 <button
                   onClick={() => setShowCreateForm(true)}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+                  className="bg-blue-600 dark:bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors flex items-center space-x-2"
                 >
                   <Plus className="h-4 w-4" />
                   <span>Create New Prompt</span>
@@ -533,47 +546,67 @@ const DynamicPromptsPage: React.FC = () => {
               </div>
 
               {showCreateForm && (
-                <div className="bg-gray-50 p-6 rounded-lg mb-6">
-                  <h3 className="text-lg font-semibold mb-4">Create New Prompt</h3>
+                <div className="bg-gray-50 dark:bg-gray-700 p-6 rounded-lg mb-6">
+                  <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Create New Prompt</h3>
                   <form onSubmit={handleCreatePrompt} className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Name *
                       </label>
                       <input
                         type="text"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="e.g., Menu Extractor, Invoice Parser"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Description
                       </label>
                       <input
                         type="text"
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="Brief description of what this prompt does"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        GPT Model *
+                      </label>
+                      <select
+                        value={formData.gpt_model}
+                        onChange={(e) => setFormData({ ...formData, gpt_model: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                      >
+                        {AVAILABLE_MODELS.map((model) => (
+                          <option key={model.id} value={model.id}>
+                            {model.name} - {model.description} ({model.price} cost)
+                          </option>
+                        ))}
+                      </select>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Choose the GPT model for processing your documents
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Prompt Template *
                       </label>
                       <textarea
                         value={formData.prompt_template}
                         onChange={(e) => setFormData({ ...formData, prompt_template: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-40"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-40"
                         placeholder="Enter your prompt template. Use {text} placeholder where you want the document text to be inserted."
                         required
                       />
-                      <p className="text-xs text-gray-500 mt-1">
-                        Use <code className="bg-gray-100 px-1 rounded">{'{text}'}</code> to insert document content
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Use <code className="bg-gray-100 dark:bg-gray-700 px-1 rounded text-gray-800 dark:text-gray-200">{'{text}'}</code> to insert document content
                       </p>
                     </div>
                     <div className="flex space-x-2">
@@ -596,40 +629,57 @@ const DynamicPromptsPage: React.FC = () => {
               )}
 
               {editingPrompt && (
-                <div className="bg-gray-50 p-6 rounded-lg mb-6">
-                  <h3 className="text-lg font-semibold mb-4">Edit Prompt</h3>
+                <div className="bg-gray-50 dark:bg-gray-700 p-6 rounded-lg mb-6">
+                  <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Edit Prompt</h3>
                   <form onSubmit={handleUpdatePrompt} className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Name *
                       </label>
                       <input
                         type="text"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Description
                       </label>
                       <input
                         type="text"
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        GPT Model *
+                      </label>
+                      <select
+                        value={formData.gpt_model}
+                        onChange={(e) => setFormData({ ...formData, gpt_model: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                      >
+                        {AVAILABLE_MODELS.map((model) => (
+                          <option key={model.id} value={model.id}>
+                            {model.name} - {model.description} ({model.price} cost)
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Prompt Template *
                       </label>
                       <textarea
                         value={formData.prompt_template}
                         onChange={(e) => setFormData({ ...formData, prompt_template: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-40"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-40"
                         required
                       />
                     </div>
@@ -654,35 +704,39 @@ const DynamicPromptsPage: React.FC = () => {
 
               <div className="grid gap-4">
                 {prompts.map((prompt) => (
-                  <div key={prompt.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+                  <div key={prompt.id} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-800">{prompt.name}</h3>
+                        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">{prompt.name}</h3>
                         {prompt.description && (
-                          <p className="text-gray-600 mt-1">{prompt.description}</p>
+                          <p className="text-gray-600 dark:text-gray-400 mt-1">{prompt.description}</p>
                         )}
-                        <div className="mt-2">
+                        <div className="mt-2 flex items-center space-x-2">
                           <span className={`inline-block px-2 py-1 text-xs rounded-full ${
-                            prompt.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                            prompt.is_active ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
                           }`}>
                             {prompt.is_active ? 'Active' : 'Inactive'}
                           </span>
+                          <span className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
+                            <Cpu className="h-3 w-3 mr-1" />
+                            {AVAILABLE_MODELS.find(m => m.id === prompt.gpt_model)?.name || prompt.gpt_model}
+                          </span>
                         </div>
-                        <p className="text-sm text-gray-500 mt-2">
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
                           Created: {new Date(prompt.created_at).toLocaleDateString()}
                         </p>
                       </div>
                       <div className="flex space-x-2">
                         <button
                           onClick={() => startEdit(prompt)}
-                          className="flex items-center space-x-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium"
+                          className="flex items-center space-x-1 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors text-sm font-medium"
                         >
                           <Edit3 className="h-4 w-4" />
                           <span>Edit</span>
                         </button>
                         <button
                           onClick={() => handleDeletePrompt(prompt.id)}
-                          className="flex items-center space-x-1 px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium"
+                          className="flex items-center space-x-1 px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors text-sm font-medium"
                         >
                           <Trash2 className="h-4 w-4" />
                           <span>Delete</span>
@@ -694,8 +748,8 @@ const DynamicPromptsPage: React.FC = () => {
               </div>
 
               {prompts.length === 0 && (
-                <div className="text-center py-12 text-gray-500">
-                  <Zap className="mx-auto h-12 w-12 text-gray-300 mb-4" />
+                <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                  <Zap className="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600 mb-4" />
                   <p className="text-lg font-medium mb-2">No prompts created yet</p>
                   <p className="text-sm">Create your first prompt to start processing documents!</p>
                 </div>
@@ -706,13 +760,45 @@ const DynamicPromptsPage: React.FC = () => {
           {activeTab === 'documents' && (
             <div>
               <div className="mb-6">
-                <h2 className="text-xl font-semibold text-gray-700 mb-4">Process Documents</h2>
+                <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-4">Process Documents</h2>
+                
+                {/* Usage Information */}
+                {usage && (
+                  <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <AlertCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                        <span className="text-sm font-medium text-blue-800 dark:text-blue-300">
+                          Dynamic Prompt Document Usage
+                        </span>
+                      </div>
+                      <div className="text-sm text-blue-700 dark:text-blue-300">
+                        {usage.dynamic_prompt_documents_uploaded || 0} / {usage.max_dynamic_prompt_documents || 5} documents used this month
+                      </div>
+                    </div>
+                    <div className="mt-2">
+                      <div className="w-full bg-blue-200 dark:bg-blue-800 rounded-full h-2">
+                        <div
+                          className="bg-blue-600 dark:bg-blue-400 h-2 rounded-full transition-all duration-300"
+                          style={{ 
+                            width: `${Math.min(100, ((usage.dynamic_prompt_documents_uploaded || 0) / (usage.max_dynamic_prompt_documents || 5)) * 100)}%` 
+                          }}
+                        ></div>
+                      </div>
+                    </div>
+                    {(usage.dynamic_prompt_documents_uploaded || 0) >= (usage.max_dynamic_prompt_documents || 5) && (
+                      <div className="mt-2 text-sm text-red-600 dark:text-red-400 font-medium">
+                        You've reached your monthly limit. Upgrade your subscription for more uploads.
+                      </div>
+                    )}
+                  </div>
+                )}
                 
                 {/* File Upload Area */}
-                <div className="bg-gray-50 p-6 rounded-lg border-2 border-dashed border-gray-300 mb-4">
+                <div className="bg-gray-50 dark:bg-gray-700 p-6 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 mb-4">
                   <div
                     className={`relative transition-colors ${
-                      dragActive ? 'border-blue-400 bg-blue-50' : 'border-gray-300'
+                      dragActive ? 'border-blue-400 dark:border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-600'
                     }`}
                     onDragEnter={handleDrag}
                     onDragLeave={handleDrag}
@@ -729,28 +815,28 @@ const DynamicPromptsPage: React.FC = () => {
                     
                     {!selectedFile ? (
                       <div className="text-center py-8">
-                        <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                        <p className="text-lg font-medium text-gray-700 mb-2">
+                        <Upload className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
+                        <p className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">
                           Drop your file here or click to browse
                         </p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
                           Supports PDF, DOCX, TXT, and image files (max 50MB)
                         </p>
                       </div>
                     ) : (
-                      <div className="flex items-center justify-between p-4 bg-white rounded-lg border">
+                      <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
                         <div className="flex items-center space-x-3">
-                          <FileText className="h-8 w-8 text-blue-600" />
+                          <FileText className="h-8 w-8 text-blue-600 dark:text-blue-400" />
                           <div>
-                            <p className="font-medium text-gray-900">{selectedFile.name}</p>
-                            <p className="text-sm text-gray-500">
+                            <p className="font-medium text-gray-900 dark:text-gray-100">{selectedFile.name}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
                               {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
                             </p>
                           </div>
                         </div>
                         <button
                           onClick={clearFile}
-                          className="text-red-600 hover:text-red-800 p-1"
+                          className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 p-1"
                         >
                           <XCircle className="h-5 w-5" />
                         </button>
@@ -761,13 +847,13 @@ const DynamicPromptsPage: React.FC = () => {
 
                 {/* Prompt Selection */}
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Select Processing Prompt
                   </label>
                   <select
                     value={selectedPromptId}
                     onChange={(e) => setSelectedPromptId(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Choose a prompt...</option>
                     {prompts.filter(p => p.is_active).map((prompt) => (
@@ -782,12 +868,12 @@ const DynamicPromptsPage: React.FC = () => {
                 {uploading && (
                   <div className="mb-4">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-gray-700">Processing...</span>
-                      <span className="text-sm text-gray-500">{uploadProgress}%</span>
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Processing...</span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">{uploadProgress}%</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                       <div
-                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                        className="bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all duration-300"
                         style={{ width: `${uploadProgress}%` }}
                       ></div>
                     </div>
@@ -797,7 +883,7 @@ const DynamicPromptsPage: React.FC = () => {
                 {/* Upload Button */}
                 <button
                   onClick={handleFileUpload}
-                  disabled={!selectedFile || !selectedPromptId || uploading}
+                  disabled={!selectedFile || !selectedPromptId || uploading || (usage && (usage.dynamic_prompt_documents_uploaded || 0) >= (usage.max_dynamic_prompt_documents || 5))}
                   className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                 >
                   {uploading ? (
@@ -816,10 +902,10 @@ const DynamicPromptsPage: React.FC = () => {
 
               <div className="mt-6">
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold text-gray-700">Processed Documents</h2>
+                  <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300">Processed Documents</h2>
                   <button
                     onClick={loadData}
-                    className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center space-x-1"
+                    className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm font-medium flex items-center space-x-1"
                   >
                     <span>Refresh</span>
                   </button>
@@ -843,23 +929,23 @@ const DynamicPromptsPage: React.FC = () => {
                     const getStatusColor = () => {
                       switch (doc.processing_status) {
                         case 'completed':
-                          return 'bg-green-100 text-green-800 border-green-200';
+                          return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-green-200 dark:border-green-800';
                         case 'failed':
-                          return 'bg-red-100 text-red-800 border-red-200';
+                          return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 border-red-200 dark:border-red-800';
                         case 'processing':
-                          return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+                          return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800';
                         default:
-                          return 'bg-gray-100 text-gray-800 border-gray-200';
+                          return 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-600';
                       }
                     };
 
                     return (
-                      <div key={doc.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+                      <div key={doc.id} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
                             <div className="flex items-center space-x-3 mb-2">
-                              <FileText className="h-6 w-6 text-blue-600" />
-                              <h3 className="text-lg font-semibold text-gray-800">{doc.original_filename}</h3>
+                              <FileText className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">{doc.original_filename}</h3>
                             </div>
                             
                             <div className="flex items-center space-x-4 mb-3">
@@ -869,17 +955,17 @@ const DynamicPromptsPage: React.FC = () => {
                                   {doc.processing_status.charAt(0).toUpperCase() + doc.processing_status.slice(1)}
                                 </span>
                               </div>
-                              <span className="text-sm text-gray-500">
+                              <span className="text-sm text-gray-500 dark:text-gray-400">
                                 Type: {doc.file_type.toUpperCase()}
                               </span>
                             </div>
                             
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
                               Processed: {new Date(doc.created_at).toLocaleString()}
                             </p>
                             
                             {doc.error_message && (
-                              <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+                              <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-sm text-red-700 dark:text-red-300">
                                 <strong>Error:</strong> {doc.error_message}
                               </div>
                             )}
@@ -889,7 +975,7 @@ const DynamicPromptsPage: React.FC = () => {
                             {doc.processing_status === 'completed' && (
                               <button
                                 onClick={() => handleViewResult(doc.id)}
-                                className="flex items-center space-x-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium"
+                                className="flex items-center space-x-1 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors text-sm font-medium"
                               >
                                 <Eye className="h-4 w-4" />
                                 <span>View Result</span>
@@ -903,8 +989,8 @@ const DynamicPromptsPage: React.FC = () => {
                 </div>
 
                 {processedDocs.length === 0 && (
-                  <div className="text-center py-12 text-gray-500">
-                    <FileText className="mx-auto h-12 w-12 text-gray-300 mb-4" />
+                  <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                    <FileText className="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600 mb-4" />
                     <p className="text-lg font-medium mb-2">No processed documents yet</p>
                     <p className="text-sm">Upload a document and select a prompt to get started!</p>
                   </div>
@@ -916,20 +1002,20 @@ const DynamicPromptsPage: React.FC = () => {
 
         {/* Result Modal */}
         {showResult && selectedResult && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
-              <div className="flex justify-between items-center p-6 border-b">
+          <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-black dark:bg-opacity-70 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
+              <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-900">Processing Result</h3>
-                  <p className="text-sm text-gray-600 mt-1">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Processing Result</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                     <strong>File:</strong> {selectedResult.original_filename}
                   </p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
                     <strong>Status:</strong> 
                     <span className={`ml-1 px-2 py-1 text-xs rounded-full ${
                       selectedResult.processing_status === 'completed' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
+                        ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' 
+                        : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
                     }`}>
                       {selectedResult.processing_status}
                     </span>
@@ -947,14 +1033,14 @@ const DynamicPromptsPage: React.FC = () => {
                       link.click();
                       URL.revokeObjectURL(url);
                     }}
-                    className="flex items-center space-x-1 px-3 py-1 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors text-sm font-medium"
+                    className="flex items-center space-x-1 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors text-sm font-medium"
                   >
                     <Download className="h-4 w-4" />
                     <span>Download JSON</span>
                   </button>
                   <button
                     onClick={() => setShowResult(false)}
-                    className="text-gray-500 hover:text-gray-700 p-1"
+                    className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 p-1"
                   >
                     <XCircle className="h-6 w-6" />
                   </button>

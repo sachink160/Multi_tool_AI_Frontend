@@ -76,16 +76,16 @@ const VideoPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg p-6 border border-white/20">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Video Processing</h1>
-        <p className="text-gray-600">Upload videos to extract audio and create 720p versions</p>
+      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-lg p-6 border border-white/20 dark:border-gray-700/20">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Video Processing</h1>
+        <p className="text-gray-600 dark:text-gray-300">Upload videos to extract audio and create 720p versions</p>
       </div>
 
       {/* Upload Section */}
-      <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg p-6 border border-white/20">
+      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-lg p-6 border border-white/20 dark:border-gray-700/20">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">Upload Video</h2>
-          <Video className="h-6 w-6 text-blue-600" />
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Upload Video</h2>
+          <Video className="h-6 w-6 text-blue-600 dark:text-blue-400" />
         </div>
         
         <div className="relative">
@@ -98,23 +98,23 @@ const VideoPage: React.FC = () => {
           />
           <label
             htmlFor="video-upload"
-            className="flex items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors"
+            className="flex items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
           >
             <div className="text-center">
-              <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-              <p className="text-sm text-gray-600">Click to upload video file</p>
-              <p className="text-xs text-gray-500">MP4, MOV, AVI, MKV</p>
+              <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400 dark:text-gray-500" />
+              <p className="text-sm text-gray-600 dark:text-gray-300">Click to upload video file</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">MP4, MOV, AVI, MKV</p>
             </div>
           </label>
         </div>
 
         {isUploading && (
-          <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+          <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
             <div className="flex items-center space-x-2">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-              <span className="text-sm text-blue-600">Uploading and processing video...</span>
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 dark:border-blue-400"></div>
+              <span className="text-sm text-blue-600 dark:text-blue-400">Uploading and processing video...</span>
             </div>
-            <p className="text-xs text-blue-500 mt-1">This may take a few minutes depending on file size</p>
+            <p className="text-xs text-blue-500 dark:text-blue-400 mt-1">This may take a few minutes depending on file size</p>
           </div>
         )}
       </div>
@@ -122,35 +122,35 @@ const VideoPage: React.FC = () => {
       {/* File Lists */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Uploaded Videos */}
-        <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg p-6 border border-white/20">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-            <FileVideo className="h-5 w-5 mr-2 text-blue-600" />
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-lg p-6 border border-white/20 dark:border-gray-700/20">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+            <FileVideo className="h-5 w-5 mr-2 text-blue-600 dark:text-blue-400" />
             Uploaded Videos
           </h2>
           
           <div className="space-y-3 max-h-96 overflow-y-auto">
             {isLoading ? (
-              <div className="text-center py-8 text-gray-500">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-2"></div>
                 <p>Loading...</p>
               </div>
             ) : uploadedVideos.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <FileVideo className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <FileVideo className="h-12 w-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
                 <p>No videos uploaded yet</p>
               </div>
             ) : (
               uploadedVideos.map((video, index) => (
-                <div key={index} className="p-3 bg-gray-50 rounded-lg">
+                <div key={index} className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                   <div className="flex items-center space-x-3">
-                    <FileVideo className="h-5 w-5 text-blue-600" />
+                    <FileVideo className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">{video.filename}</p>
-                      <p className="text-xs text-gray-500 flex items-center">
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{video.filename}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
                         <Clock className="h-3 w-3 mr-1" />
                         {new Date(video.upload_date).toLocaleDateString()}
                       </p>
-                      <p className="text-xs text-gray-500">{formatFileSize(video.size)}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{formatFileSize(video.size)}</p>
                     </div>
                   </div>
                 </div>
@@ -160,36 +160,36 @@ const VideoPage: React.FC = () => {
         </div>
 
         {/* Processed Videos */}
-        <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg p-6 border border-white/20">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-            <Video className="h-5 w-5 mr-2 text-green-600" />
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-lg p-6 border border-white/20 dark:border-gray-700/20">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+            <Video className="h-5 w-5 mr-2 text-green-600 dark:text-green-400" />
             Processed Videos (720p)
           </h2>
           
           <div className="space-y-3 max-h-96 overflow-y-auto">
             {videoFiles.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <Video className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <Video className="h-12 w-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
                 <p>No processed videos yet</p>
               </div>
             ) : (
               videoFiles.map((video, index) => (
-                <div key={index} className="p-3 bg-gray-50 rounded-lg">
+                <div key={index} className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <Video className="h-5 w-5 text-green-600" />
+                      <Video className="h-5 w-5 text-green-600 dark:text-green-400" />
                       <div>
-                        <p className="text-sm font-medium text-gray-900">{video.filename}</p>
-                        <p className="text-xs text-gray-500 flex items-center">
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{video.filename}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
                           <Clock className="h-3 w-3 mr-1" />
                           {new Date(video.processed_date).toLocaleDateString()}
                         </p>
-                        <p className="text-xs text-gray-500">{formatFileSize(video.size)}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{formatFileSize(video.size)}</p>
                       </div>
                     </div>
                     <button
                       onClick={() => handleDownload(video.filename)}
-                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                     >
                       <Download className="h-4 w-4" />
                     </button>
@@ -201,36 +201,36 @@ const VideoPage: React.FC = () => {
         </div>
 
         {/* Extracted Audio */}
-        <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg p-6 border border-white/20">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-            <Music className="h-5 w-5 mr-2 text-purple-600" />
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-lg p-6 border border-white/20 dark:border-gray-700/20">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+            <Music className="h-5 w-5 mr-2 text-purple-600 dark:text-purple-400" />
             Extracted Audio
           </h2>
           
           <div className="space-y-3 max-h-96 overflow-y-auto">
             {audioFiles.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <Headphones className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <Headphones className="h-12 w-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
                 <p>No audio files yet</p>
               </div>
             ) : (
               audioFiles.map((audio, index) => (
-                <div key={index} className="p-3 bg-gray-50 rounded-lg">
+                <div key={index} className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <Music className="h-5 w-5 text-purple-600" />
+                      <Music className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                       <div>
-                        <p className="text-sm font-medium text-gray-900">{audio.filename}</p>
-                        <p className="text-xs text-gray-500 flex items-center">
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{audio.filename}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
                           <Clock className="h-3 w-3 mr-1" />
                           {new Date(audio.processed_date).toLocaleDateString()}
                         </p>
-                        <p className="text-xs text-gray-500">{formatFileSize(audio.size)}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{formatFileSize(audio.size)}</p>
                       </div>
                     </div>
                     <button
                       onClick={() => handleDownload(audio.filename)}
-                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                     >
                       <Download className="h-4 w-4" />
                     </button>

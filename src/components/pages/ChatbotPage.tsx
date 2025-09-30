@@ -86,16 +86,16 @@ const ChatbotPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg p-6 border border-white/20">
+      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-lg p-6 border border-white/20 dark:border-gray-700/20">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">AI Chatbot</h1>
-            <p className="text-gray-600">Chat with our AI assistant with access to various tools and knowledge</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">AI Chatbot</h1>
+            <p className="text-gray-600 dark:text-gray-300">Chat with our AI assistant with access to various tools and knowledge</p>
           </div>
           <div className="flex items-center space-x-2">
             <button
               onClick={clearChat}
-              className="flex items-center space-x-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              className="flex items-center space-x-2 px-4 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
             >
               <Trash2 className="h-4 w-4" />
               <span>Clear Chat</span>
@@ -105,13 +105,13 @@ const ChatbotPage: React.FC = () => {
       </div>
 
       {/* Chat Interface */}
-      <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg border border-white/20 flex flex-col h-[600px]">
+      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-lg border border-white/20 dark:border-gray-700/20 flex flex-col h-[600px]">
         {/* Chat Messages */}
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
           {messages.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-gray-500">
+            <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
               <div className="text-center">
-                <MessageSquare className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+                <MessageSquare className="h-16 w-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
                 <p className="text-lg font-medium">Start a conversation</p>
                 <p className="text-sm">Ask me anything! I have access to search, weather, trip planning, and more.</p>
               </div>
@@ -125,13 +125,13 @@ const ChatbotPage: React.FC = () => {
                 <div
                   className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
                     message.sender === 'user'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-900'
+                      ? 'bg-blue-600 dark:bg-blue-500 text-white'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                   }`}
                 >
                   <div className="flex items-start space-x-2">
                     {message.sender === 'assistant' && (
-                      <Bot className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                      <Bot className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
                     )}
                     {message.sender === 'user' && (
                       <User className="h-5 w-5 text-blue-100 mt-0.5 flex-shrink-0" />
@@ -139,10 +139,10 @@ const ChatbotPage: React.FC = () => {
                     <div className="flex-1">
                       <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                       {message.sender === 'assistant' && message.tool_used && (
-                        <span className="text-xs text-gray-400">Tool used: {message.tool_used}</span>
+                        <span className="text-xs text-gray-400 dark:text-gray-500">Tool used: {message.tool_used}</span>
                       )}
                       <p className={`text-xs mt-1 ${
-                        message.sender === 'user' ? 'text-blue-100' : 'text-gray-500'
+                        message.sender === 'user' ? 'text-blue-100' : 'text-gray-500 dark:text-gray-400'
                       }`}>
                         {new Date(message.timestamp).toLocaleTimeString()}
                       </p>
@@ -156,13 +156,13 @@ const ChatbotPage: React.FC = () => {
           {/* Typing Indicator */}
           {isTyping && (
             <div className="flex justify-start">
-              <div className="max-w-xs lg:max-w-md px-4 py-2 rounded-2xl bg-gray-100">
+              <div className="max-w-xs lg:max-w-md px-4 py-2 rounded-2xl bg-gray-100 dark:bg-gray-700">
                 <div className="flex items-center space-x-2">
-                  <Bot className="h-5 w-5 text-blue-600" />
+                  <Bot className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                    <div className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                   </div>
                 </div>
               </div>
@@ -173,7 +173,7 @@ const ChatbotPage: React.FC = () => {
         </div>
 
         {/* Input Area */}
-        <div className="p-6 border-t border-gray-200">
+        <div className="p-6 border-t border-gray-200 dark:border-gray-700">
           <div className="flex items-center space-x-4">
             <div className="flex-1 relative">
               <textarea
@@ -181,7 +181,7 @@ const ChatbotPage: React.FC = () => {
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Type your message here..."
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                 rows={2}
                 disabled={isLoading}
               />
@@ -189,7 +189,7 @@ const ChatbotPage: React.FC = () => {
             <button
               onClick={handleSendMessage}
               disabled={isLoading || !inputMessage.trim()}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+              className="px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
             >
               {isLoading ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>

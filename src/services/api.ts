@@ -298,6 +298,18 @@ class APIService {
     return this.request('/profile');
   }
 
+  async updateUserProfile(profileData: {
+    fullname?: string;
+    email?: string;
+    phone?: string;
+    password?: string;
+  }): Promise<{ message: string }> {
+    return this.request('/profile', {
+      method: 'PUT',
+      body: JSON.stringify(profileData),
+    });
+  }
+
   // Subscription endpoints
   async getSubscriptionPlans(): Promise<SubscriptionPlan[]> {
     return this.request('/plans');
