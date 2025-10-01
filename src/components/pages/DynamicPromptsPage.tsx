@@ -702,49 +702,90 @@ const DynamicPromptsPage: React.FC = () => {
                 </div>
               )}
 
-              <div className="grid gap-4">
-                {prompts.map((prompt) => (
-                  <div key={prompt.id} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">{prompt.name}</h3>
-                        {prompt.description && (
-                          <p className="text-gray-600 dark:text-gray-400 mt-1">{prompt.description}</p>
-                        )}
-                        <div className="mt-2 flex items-center space-x-2">
+              <div className="overflow-x-auto">
+                <table className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm">
+                  <thead className="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Prompt Name
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Description
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        GPT Model
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Created Date
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                    {prompts.map((prompt) => (
+                      <tr key={prompt.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <Zap className="h-5 w-5 text-blue-600 dark:text-blue-400 mr-3" />
+                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                              {prompt.name}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-gray-600 dark:text-gray-400 max-w-xs truncate">
+                            {prompt.description || 'No description'}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`inline-block px-2 py-1 text-xs rounded-full ${
-                            prompt.is_active ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
+                            prompt.is_active 
+                              ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' 
+                              : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
                           }`}>
                             {prompt.is_active ? 'Active' : 'Inactive'}
                           </span>
-                          <span className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
-                            <Cpu className="h-3 w-3 mr-1" />
-                            {AVAILABLE_MODELS.find(m => m.id === prompt.gpt_model)?.name || prompt.gpt_model}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <Cpu className="h-4 w-4 text-blue-600 dark:text-blue-400 mr-2" />
+                            <span className="text-sm text-gray-900 dark:text-gray-100">
+                              {AVAILABLE_MODELS.find(m => m.id === prompt.gpt_model)?.name || prompt.gpt_model}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="text-sm text-gray-500 dark:text-gray-400">
+                            {new Date(prompt.created_at).toLocaleDateString()}
                           </span>
-                        </div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                          Created: {new Date(prompt.created_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => startEdit(prompt)}
-                          className="flex items-center space-x-1 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors text-sm font-medium"
-                        >
-                          <Edit3 className="h-4 w-4" />
-                          <span>Edit</span>
-                        </button>
-                        <button
-                          onClick={() => handleDeletePrompt(prompt.id)}
-                          className="flex items-center space-x-1 px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors text-sm font-medium"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          <span>Delete</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => startEdit(prompt)}
+                              className="flex items-center space-x-1 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors text-sm font-medium"
+                            >
+                              <Edit3 className="h-4 w-4" />
+                              <span>Edit</span>
+                            </button>
+                            <button
+                              onClick={() => handleDeletePrompt(prompt.id)}
+                              className="flex items-center space-x-1 px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors text-sm font-medium"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              <span>Delete</span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
 
               {prompts.length === 0 && (
@@ -911,81 +952,106 @@ const DynamicPromptsPage: React.FC = () => {
                   </button>
                 </div>
                 
-                <div className="grid gap-4">
-                  {processedDocs.map((doc) => {
-                    const getStatusIcon = () => {
-                      switch (doc.processing_status) {
-                        case 'completed':
-                          return <CheckCircle className="h-5 w-5 text-green-600" />;
-                        case 'failed':
-                          return <XCircle className="h-5 w-5 text-red-600" />;
-                        case 'processing':
-                          return <Clock className="h-5 w-5 text-yellow-600" />;
-                        default:
-                          return <AlertCircle className="h-5 w-5 text-gray-600" />;
-                      }
-                    };
+                <div className="overflow-x-auto">
+                  <table className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm">
+                    <thead className="bg-gray-50 dark:bg-gray-700">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          Document
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          Status
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          Type
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          Processed Date
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                      {processedDocs.map((doc) => {
+                        const getStatusIcon = () => {
+                          switch (doc.processing_status) {
+                            case 'completed':
+                              return <CheckCircle className="h-4 w-4 text-green-600" />;
+                            case 'failed':
+                              return <XCircle className="h-4 w-4 text-red-600" />;
+                            case 'processing':
+                              return <Clock className="h-4 w-4 text-yellow-600" />;
+                            default:
+                              return <AlertCircle className="h-4 w-4 text-gray-600" />;
+                          }
+                        };
 
-                    const getStatusColor = () => {
-                      switch (doc.processing_status) {
-                        case 'completed':
-                          return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-green-200 dark:border-green-800';
-                        case 'failed':
-                          return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 border-red-200 dark:border-red-800';
-                        case 'processing':
-                          return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800';
-                        default:
-                          return 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-600';
-                      }
-                    };
+                        const getStatusColor = () => {
+                          switch (doc.processing_status) {
+                            case 'completed':
+                              return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-green-200 dark:border-green-800';
+                            case 'failed':
+                              return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 border-red-200 dark:border-red-800';
+                            case 'processing':
+                              return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800';
+                            default:
+                              return 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-600';
+                          }
+                        };
 
-                    return (
-                      <div key={doc.id} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-3 mb-2">
-                              <FileText className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">{doc.original_filename}</h3>
-                            </div>
-                            
-                            <div className="flex items-center space-x-4 mb-3">
-                              <div className="flex items-center space-x-2">
+                        return (
+                          <tr key={doc.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center">
+                                <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400 mr-3" />
+                                <div>
+                                  <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                    {doc.original_filename}
+                                  </div>
+                                  {doc.error_message && (
+                                    <div className="text-xs text-red-600 dark:text-red-400 mt-1">
+                                      Error: {doc.error_message}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center">
                                 {getStatusIcon()}
-                                <span className={`inline-block px-3 py-1 text-xs rounded-full border ${getStatusColor()}`}>
+                                <span className={`ml-2 inline-block px-2 py-1 text-xs rounded-full border ${getStatusColor()}`}>
                                   {doc.processing_status.charAt(0).toUpperCase() + doc.processing_status.slice(1)}
                                 </span>
                               </div>
-                              <span className="text-sm text-gray-500 dark:text-gray-400">
-                                Type: {doc.file_type.toUpperCase()}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className="text-sm text-gray-900 dark:text-gray-100">
+                                {doc.file_type.toUpperCase()}
                               </span>
-                            </div>
-                            
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                              Processed: {new Date(doc.created_at).toLocaleString()}
-                            </p>
-                            
-                            {doc.error_message && (
-                              <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-sm text-red-700 dark:text-red-300">
-                                <strong>Error:</strong> {doc.error_message}
-                              </div>
-                            )}
-                          </div>
-                          
-                          <div className="flex space-x-2">
-                            {doc.processing_status === 'completed' && (
-                              <button
-                                onClick={() => handleViewResult(doc.id)}
-                                className="flex items-center space-x-1 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors text-sm font-medium"
-                              >
-                                <Eye className="h-4 w-4" />
-                                <span>View Result</span>
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className="text-sm text-gray-500 dark:text-gray-400">
+                                {new Date(doc.created_at).toLocaleString()}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              {doc.processing_status === 'completed' && (
+                                <button
+                                  onClick={() => handleViewResult(doc.id)}
+                                  className="flex items-center space-x-1 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors text-sm font-medium"
+                                >
+                                  <Eye className="h-4 w-4" />
+                                  <span>View Result</span>
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
 
                 {processedDocs.length === 0 && (
