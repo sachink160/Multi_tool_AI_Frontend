@@ -267,19 +267,10 @@ const SubscriptionPage: React.FC<SubscriptionPageProps> = ({ onSubscriptionChang
                 <div className="text-gray-600 dark:text-gray-400">per month</div>
               </div>
 
-              <div className="space-y-4 mb-8">
-                {formatFeatures(plan.features).map((feature: string, index: number) => (
-                  <div key={index} className="flex items-center">
-                    <Check className="h-5 w-5 text-green-500 dark:text-green-400 mr-3 flex-shrink-0" />
-                    <span className="text-gray-700 dark:text-gray-300">{feature}</span>
-                  </div>
-                ))}
-              </div>
-
               {currentSubscription?.plan_name === plan.name ? (
                 <button
                   disabled
-                  className="w-full bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-300 py-3 rounded-lg font-medium cursor-not-allowed"
+                  className="w-full mb-6 bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-300 py-3 rounded-lg font-medium cursor-not-allowed"
                 >
                   Current Plan
                 </button>
@@ -287,11 +278,20 @@ const SubscriptionPage: React.FC<SubscriptionPageProps> = ({ onSubscriptionChang
                 <button
                   onClick={() => handleSubscribe(plan.id)}
                   disabled={subscribing}
-                  className="w-full bg-blue-600 dark:bg-blue-500 text-white py-3 rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full mb-6 bg-blue-600 dark:bg-blue-500 text-white py-3 rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {subscribing ? 'Processing...' : 'Subscribe Now'}
                 </button>
               )}
+
+              <div className="space-y-4">
+                {formatFeatures(plan.features).map((feature: string, index: number) => (
+                  <div key={index} className="flex items-center">
+                    <Check className="h-5 w-5 text-green-500 dark:text-green-400 mr-3 flex-shrink-0" />
+                    <span className="text-gray-700 dark:text-gray-300">{feature}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>
