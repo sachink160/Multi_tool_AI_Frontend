@@ -1,4 +1,4 @@
-import { AuthTokens, User, Document, HRDocument, ChatMessage, VideoFile, ProcessedFile, BackendChatHistory, UserProfile, SubscriptionPlan, UserSubscription, UsageInfo, DynamicPrompt, DynamicPromptCreate, DynamicPromptUpdate, ProcessedDocument, DocumentProcessResult } from '../types';
+import { AuthTokens, User, Document, HRDocument, ChatMessage, VideoFile, ProcessedFile, BackendChatHistory, UserProfile, SubscriptionPlan, UserSubscription, UsageInfo, DynamicPrompt, DynamicPromptCreate, DynamicPromptUpdate, ProcessedDocument, DocumentProcessResult, CrmMetrics, ResumeItem, JobRequirementItem, ResumeMatchItem } from '../types';
 
 // const API_BASE_URL = 'https://9b3fe599ffc6.ngrok-free.app/';
 const API_BASE_URL = 'http://localhost:8000';
@@ -398,6 +398,79 @@ class APIService {
 
   async getProcessingResult(documentId: string): Promise<DocumentProcessResult> {
     return this.request(`/dynamic-prompts/processed-documents/${documentId}/result`);
+  }
+
+  // CRM endpoints
+  async getCrmMetrics(): Promise<CrmMetrics> {
+    return this.request('/crm/metrics');
+  }
+
+  // Resume matching endpoints
+  async uploadResume(file: File): Promise<ResumeItem> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(`${API_BASE_URL}/resumes/upload`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Resume upload failed');
+    }
+
+    return response.json();
+  }
+
+  async listResumes(): Promise<ResumeItem[]> {
+    return this.request('/resumes/resumes');
+  }
+
+  async createRequirement(payload: { title: string; description?: string; requirement_json: string; gpt_model?: string; }): Promise<JobRequirementItem> {
+    return this.request('/resumes/requirements', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async listRequirements(): Promise<JobRequirementItem[]> {
+    return this.request('/resumes/requirements');
+  }
+
+  async updateRequirement(id: string, payload: { title?: string; description?: string; requirement_json?: string; gpt_model?: string; is_active?: boolean; }): Promise<JobRequirementItem> {
+    return this.request(`/resumes/requirements/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async matchResumes(requirementId: string, resumeIds: string[]): Promise<ResumeMatchItem[]> {
+    const form = new FormData();
+    form.append('requirement_id', requirementId);
+    form.append('resume_ids', resumeIds.join(','));
+
+    const response = await fetch(`${API_BASE_URL}/resumes/match`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: form,
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Matching failed');
+    }
+
+    return response.json();
+  }
+
+  async listMatches(requirementId?: string): Promise<ResumeMatchItem[]> {
+    const params = new URLSearchParams();
+    if (requirementId) params.set('requirement_id', requirementId);
+    const qs = params.toString();
+    const endpoint = `/resumes/matches${qs ? `?${qs}` : ''}`;
+    return this.request(endpoint);
   }
 }
 

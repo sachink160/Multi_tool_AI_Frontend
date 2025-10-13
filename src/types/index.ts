@@ -172,3 +172,76 @@ export interface DocumentProcessResult {
   processing_status: string;
   result: any;
 }
+
+// CRM metrics types
+export interface CrmUsersMetrics {
+  total: number;
+  admins: number;
+  subscribed_active: number;
+  new_last_7_days: number;
+  free_users: number;
+  paid_users: number;
+}
+
+export interface CrmSubscriptionsMetrics {
+  active: number;
+  expiring_7_days: number;
+  churned_30_days: number;
+  plans?: Record<string, number>;
+}
+
+export interface CrmTopUser {
+  user_id: string;
+  username: string;
+  chats_used: number;
+  documents_uploaded: number;
+}
+
+export interface CrmMetrics {
+  users: CrmUsersMetrics;
+  subscriptions: CrmSubscriptionsMetrics;
+  usage_month: string;
+  usage: {
+    chats_used: number;
+    documents_uploaded: number;
+    hr_documents_uploaded: number;
+    video_uploads: number;
+    dynamic_prompt_documents_uploaded: number;
+  };
+  top_users: CrmTopUser[];
+  daily_signups?: { date: string; count: number }[];
+  content_totals?: {
+    documents: number;
+    hr_documents: number;
+    dynamic_prompt_documents: number;
+  };
+}
+
+// Resume matching types
+export interface ResumeItem {
+  id: string;
+  original_filename: string;
+  file_type: string;
+  created_at: string;
+}
+
+export interface JobRequirementItem {
+  id: string;
+  title: string;
+  description?: string;
+  requirement_json: string;
+  gpt_model: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ResumeMatchItem {
+  id: string;
+  requirement_id: string;
+  resume_id: string;
+  score: number;
+  rationale?: string;
+  match_metadata?: string;
+  created_at: string;
+}

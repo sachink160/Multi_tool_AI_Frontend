@@ -26,15 +26,23 @@ const Layout: React.FC<LayoutProps> = ({ children, currentPage, onPageChange }) 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, logout } = useAuth();
 
-  const navigation = [
+  const baseNavigation = [
     { name: 'Dashboard', id: 'dashboard', icon: Home },
     { name: 'Document Q&A', id: 'documents', icon: FileText },
     { name: 'AI Chatbot', id: 'chatbot', icon: Bot },
     { name: 'Dynamic Prompts', id: 'dynamic-prompts', icon: Zap },
+    { name: 'Resume Matching', id: 'resume', icon: Users },
     { name: 'HR Tools', id: 'hr', icon: Users },
     { name: 'Video Processing', id: 'video', icon: Video },
     { name: 'Subscription', id: 'subscription', icon: CreditCard },
     { name: 'Profile', id: 'profile', icon: User },
+  ];
+
+  const navigation = [
+    ...baseNavigation.slice(0, 1),
+    // Insert CRM after Dashboard for admins
+    ...(user?.user_type && user.user_type.toLowerCase() === 'admin' ? [{ name: 'CRM', id: 'crm', icon: MessageSquare }] : []),
+    ...baseNavigation.slice(1),
   ];
 
   const handleLogout = async () => {

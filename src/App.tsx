@@ -7,10 +7,12 @@ import DashboardPage from './components/pages/DashboardPage';
 import DocumentsPage from './components/pages/DocumentsPage';
 import ChatbotPage from './components/pages/ChatbotPage';
 import DynamicPromptsPage from './components/pages/DynamicPromptsPage';
+import ResumePage from './components/pages/ResumePage';
 import HRPage from './components/pages/HRPage';
 import VideoPage from './components/pages/VideoPage';
 import ProfilePage from './components/pages/ProfilePage';
 import SubscriptionPage from './components/pages/SubscriptionPage';
+import CRMPage from './components/pages/CRMPage';
 
 const AppContent: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -41,12 +43,16 @@ const AppContent: React.FC = () => {
     switch (currentPage) {
       case 'dashboard':
         return <DashboardPage key={refreshKey} />;
+      case 'crm':
+        return <CRMPage />;
       case 'documents':
         return <DocumentsPage />;
       case 'chatbot':
         return <ChatbotPage />;
       case 'dynamic-prompts':
         return <DynamicPromptsPage />;
+      case 'resume':
+        return <ResumePage />;
       case 'hr':
         return <HRPage />;
       case 'video':
