@@ -1,17 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Bot, User, History, Trash2, MessageSquare } from 'lucide-react';
+import { Send, Bot, User, History, Trash2, MessageSquare, Upload, FileText, CheckCircle2, XCircle, Loader2, Trash } from 'lucide-react';
 import { apiService } from '../../services/api';
-import { ChatMessage } from '../../types';
+import { ChatMessage, ChatDocumentItem } from '../../types';
 
 const ChatbotPage: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [chatDocs, setChatDocs] = useState<ChatDocumentItem[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchChatHistory();
+    fetchChatDocuments();
   }, []);
 
   useEffect(() => {
@@ -29,6 +32,55 @@ const ChatbotPage: React.FC = () => {
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const fetchChatDocuments = async () => {
+    try {
+      const docs = await apiService.listChatDocuments();
+      setChatDocs(docs);
+    } catch (e) {
+      console.error('Failed to load chat documents', e);
+    }
+  };
+
+  const handleUploadChatDoc = async (file?: File) => {
+    if (!file) return;
+    setIsUploading(true);
+    try {
+      await apiService.uploadChatDocument(file);
+      await fetchChatDocuments();
+    } catch (e) {
+      console.error('Failed to upload chat document', e);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleActivateDoc = async (id: string) => {
+    try {
+      await apiService.activateChatDocument(id);
+      await fetchChatDocuments();
+    } catch (e) {
+      console.error('Failed to activate document', e);
+    }
+  };
+
+  const handleDeactivateDoc = async (id: string) => {
+    try {
+      await apiService.deactivateChatDocument(id);
+      await fetchChatDocuments();
+    } catch (e) {
+      console.error('Failed to deactivate document', e);
+    }
+  };
+
+  const handleDeleteDoc = async (id: string) => {
+    try {
+      await apiService.deleteChatDocument(id);
+      await fetchChatDocuments();
+    } catch (e) {
+      console.error('Failed to delete document', e);
+    }
   };
 
   const handleSendMessage = async () => {
@@ -102,6 +154,97 @@ const ChatbotPage: React.FC = () => {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Chat Documents Section */}
+      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-lg p-6 border border-white/20 dark:border-gray-700/20">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Chat Documents</h2>
+            {chatDocs.length > 0 && (
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                ({chatDocs.filter(d => d.is_active).length} active)
+              </span>
+            )}
+          </div>
+          <label className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg cursor-pointer hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">
+            {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+            <span className="text-sm font-medium">{isUploading ? 'Uploading...' : 'Upload Document'}</span>
+            <input
+              type="file"
+              className="hidden"
+              accept=".pdf,.txt,.doc,.docx,.md,.rtf,.csv,.json,.html"
+              onChange={(e) => handleUploadChatDoc(e.target.files?.[0])}
+            />
+          </label>
+        </div>
+
+        {/* Chat Docs List */}
+        {chatDocs.length === 0 ? (
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+            <FileText className="h-12 w-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
+            <p className="text-sm">No chat documents uploaded yet.</p>
+            <p className="text-xs mt-1">Upload documents to enable context-aware responses.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-3">
+            {chatDocs.map((doc) => (
+              <div 
+                key={doc.id} 
+                className={`group flex items-center justify-between p-3 rounded-lg border transition-all ${
+                  doc.is_active 
+                    ? 'border-green-500 bg-green-50 dark:bg-green-900/20 dark:border-green-400' 
+                    : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 hover:border-gray-300 dark:hover:border-gray-600'
+                }`}
+              >
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  {doc.is_active ? (
+                    <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                  ) : (
+                    <FileText className="h-5 w-5 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                  )}
+                  <span className={`text-sm font-medium truncate ${
+                    doc.is_active 
+                      ? 'text-green-700 dark:text-green-300' 
+                      : 'text-gray-700 dark:text-gray-300'
+                  }`}>
+                    {doc.filename}
+                  </span>
+                  {doc.is_active && (
+                    <span className="ml-2 px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/30 rounded">
+                      Active
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 ml-3">
+                  {doc.is_active ? (
+                    <button 
+                      onClick={() => handleDeactivateDoc(doc.id)} 
+                      className="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                    >
+                      Deactivate
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={() => handleActivateDoc(doc.id)} 
+                      className="px-3 py-1.5 text-xs font-medium text-blue-700 dark:text-blue-300 hover:text-blue-900 dark:hover:text-blue-200 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded transition-colors"
+                    >
+                      Activate
+                    </button>
+                  )}
+                  <button 
+                    onClick={() => handleDeleteDoc(doc.id)} 
+                    className="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                    title="Delete document"
+                  >
+                    <Trash className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Chat Interface */}

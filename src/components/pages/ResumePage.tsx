@@ -3,6 +3,115 @@ import { apiService } from '../../services/api';
 import { ResumeItem, JobRequirementItem, ResumeMatchItem } from '../../types';
 import { Upload, FileText, Sparkles, ShieldCheck, CheckCircle, AlertCircle } from 'lucide-react';
 
+// Default role templates to suggest titles/descriptions/JSON quickly
+type RequirementTemplate = {
+  key: string;
+  title: string;
+  description: string;
+  requirement_json: string;
+  gpt_model: string;
+  isCustom?: boolean; // for display only
+};
+
+const DEFAULT_TEMPLATES: RequirementTemplate[] = [
+  {
+    key: 'react_fe',
+    title: 'Frontend Engineer (React)',
+    description: 'Build modern React apps with TypeScript, state management, testing, and performance tuning.',
+    requirement_json: JSON.stringify(
+      {
+        skills: ['React', 'TypeScript', 'Redux or Zustand', 'CSS/Tailwind', 'Jest/RTL'],
+        min_years: 3,
+        nice_to_have: ['Next.js', 'Vite', 'Accessibility (a11y)'],
+        education: 'Bachelor or equivalent experience'
+      },
+      null,
+      2
+    ),
+    gpt_model: 'gpt-4o-mini'
+  },
+  {
+    key: 'py_be',
+    title: 'Backend Engineer (Python/FastAPI)',
+    description: 'Design secure, scalable APIs and services using Python, FastAPI, and SQL databases.',
+    requirement_json: JSON.stringify(
+      {
+        skills: ['Python', 'FastAPI', 'SQLAlchemy', 'PostgreSQL', 'Docker'],
+        min_years: 3,
+        nice_to_have: ['Redis', 'Celery', 'Kubernetes', 'PyTest'],
+        education: 'Bachelor or equivalent experience'
+      },
+      null,
+      2
+    ),
+    gpt_model: 'gpt-4o-mini'
+  },
+  {
+    key: 'ds',
+    title: 'Data Scientist',
+    description: 'Explore data, build ML models, and communicate insights with clear metrics.',
+    requirement_json: JSON.stringify(
+      {
+        skills: ['Python', 'Pandas', 'NumPy', 'scikit-learn', 'SQL'],
+        min_years: 2,
+        nice_to_have: ['TensorFlow or PyTorch', 'ML Ops', 'Experiment tracking'],
+        education: 'Masters preferred'
+      },
+      null,
+      2
+    ),
+    gpt_model: 'gpt-4o-mini'
+  },
+  {
+    key: 'devops',
+    title: 'DevOps Engineer',
+    description: 'Automate infrastructure, CI/CD, monitoring, and reliability on cloud platforms.',
+    requirement_json: JSON.stringify(
+      {
+        skills: ['AWS/GCP', 'Terraform', 'Docker', 'Kubernetes', 'Linux'],
+        min_years: 3,
+        nice_to_have: ['Prometheus/Grafana', 'GitHub Actions/ArgoCD'],
+        education: 'Any'
+      },
+      null,
+      2
+    ),
+    gpt_model: 'gpt-4o-mini'
+  },
+  {
+    key: 'qa',
+    title: 'QA Engineer',
+    description: 'Own quality with test automation, API/UI testing, and clear defect reporting.',
+    requirement_json: JSON.stringify(
+      {
+        skills: ['Test Automation', 'Playwright/Selenium', 'API testing', 'CI/CD'],
+        min_years: 2,
+        nice_to_have: ['Performance testing', 'Mobile testing'],
+        education: 'Any'
+      },
+      null,
+      2
+    ),
+    gpt_model: 'gpt-4o-mini'
+  },
+  {
+    key: 'pm',
+    title: 'Product Manager',
+    description: 'Drive discovery, prioritize roadmaps, and deliver outcomes with metrics.',
+    requirement_json: JSON.stringify(
+      {
+        skills: ['Product discovery', 'Roadmapping', 'Analytics', 'User research'],
+        min_years: 3,
+        nice_to_have: ['B2B SaaS', 'Growth'],
+        education: 'Any'
+      },
+      null,
+      2
+    ),
+    gpt_model: 'gpt-4o-mini'
+  }
+];
+
 const ResumePage: React.FC = () => {
   const [resumes, setResumes] = useState<ResumeItem[]>([]);
   const [requirements, setRequirements] = useState<JobRequirementItem[]>([]);
@@ -19,6 +128,50 @@ const ResumePage: React.FC = () => {
   const [formDesc, setFormDesc] = useState('');
   const [formJson, setFormJson] = useState('');
   const [formModel, setFormModel] = useState('gpt-4o-mini');
+  const [selectedTemplateKey, setSelectedTemplateKey] = useState<string>('');
+  const [customTemplates, setCustomTemplates] = useState<RequirementTemplate[]>([]);
+
+  // Load custom templates from localStorage
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('resume_req_templates');
+      if (raw) {
+        const parsed: RequirementTemplate[] = JSON.parse(raw);
+        setCustomTemplates(parsed.map(t => ({ ...t, isCustom: true })));
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const allTemplates = useMemo<RequirementTemplate[]>(() => [
+    ...customTemplates,
+    ...DEFAULT_TEMPLATES
+  ], [customTemplates]);
+
+  const saveCurrentAsTemplate = () => {
+    if (!formTitle.trim() || !formJson.trim()) return;
+    const key = `${formTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`;
+    const tpl: RequirementTemplate = {
+      key,
+      title: formTitle.trim(),
+      description: formDesc.trim(),
+      requirement_json: formJson,
+      gpt_model: formModel || 'gpt-4o-mini',
+      isCustom: true
+    };
+    const next = [tpl, ...customTemplates];
+    setCustomTemplates(next);
+    localStorage.setItem('resume_req_templates', JSON.stringify(next));
+    setSelectedTemplateKey(key);
+  };
+
+  const deleteTemplate = (key: string) => {
+    const next = customTemplates.filter(t => t.key !== key);
+    setCustomTemplates(next);
+    localStorage.setItem('resume_req_templates', JSON.stringify(next));
+    if (selectedTemplateKey === key) setSelectedTemplateKey('');
+  };
 
   const selectedCount = useMemo(() => selectedResumeIds.length, [selectedResumeIds]);
 
@@ -227,6 +380,72 @@ const ResumePage: React.FC = () => {
             )}
           </div>
           
+          {/* Quick templates and user templates */}
+          <div className="rounded-lg bg-gray-50 dark:bg-gray-700/40 border border-gray-200 dark:border-gray-600 p-3 mb-2">
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+              <p className="text-sm font-medium text-gray-800 dark:text-gray-200">Templates & suggestions</p>
+            </div>
+            <div className="flex gap-2 mb-2">
+              <select
+                value={selectedTemplateKey}
+                onChange={(e) => setSelectedTemplateKey(e.target.value)}
+                className="flex-1 px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none"
+              >
+                <option value="">Choose a role…</option>
+                {allTemplates.map(t => (
+                  <option key={t.key} value={t.key}>{t.title}{t.isCustom ? ' (My template)' : ''}</option>
+                ))}
+              </select>
+              <button
+                type="button"
+                className="px-3 py-2 rounded-md bg-purple-600 hover:bg-purple-700 text-white text-sm disabled:opacity-50"
+                disabled={!selectedTemplateKey}
+                onClick={() => {
+                  const t = allTemplates.find(x => x.key === selectedTemplateKey);
+                  if (!t) return;
+                  setFormTitle(t.title);
+                  setFormDesc(t.description);
+                  setFormJson(t.requirement_json);
+                  setFormModel(t.gpt_model);
+                }}
+              >
+                Use template
+              </button>
+              <button
+                type="button"
+                className="px-3 py-2 rounded-md bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-100 text-sm"
+                onClick={saveCurrentAsTemplate}
+                title="Save current form as a reusable template"
+              >
+                Save as template
+              </button>
+            </div>
+            {customTemplates.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {customTemplates.map(t => (
+                  <div key={t.key} className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-full text-xs bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                    <button
+                      type="button"
+                      className="text-gray-800 dark:text-gray-100 hover:underline"
+                      onClick={() => {
+                        setSelectedTemplateKey(t.key);
+                        setFormTitle(t.title);
+                        setFormDesc(t.description);
+                        setFormJson(t.requirement_json);
+                        setFormModel(t.gpt_model);
+                      }}
+                      title={t.description}
+                    >
+                      {t.title}
+                    </button>
+                    <button type="button" className="text-red-600 dark:text-red-400" onClick={() => deleteTemplate(t.key)} aria-label="Delete template">×</button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div className="space-y-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Job Title</label>

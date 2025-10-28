@@ -1,6 +1,6 @@
-import { AuthTokens, User, Document, HRDocument, ChatMessage, VideoFile, ProcessedFile, BackendChatHistory, UserProfile, SubscriptionPlan, UserSubscription, UsageInfo, DynamicPrompt, DynamicPromptCreate, DynamicPromptUpdate, ProcessedDocument, DocumentProcessResult, CrmMetrics, ResumeItem, JobRequirementItem, ResumeMatchItem } from '../types';
+import { AuthTokens, User, Document, HRDocument, ChatMessage, VideoFile, ProcessedFile, BackendChatHistory, UserProfile, SubscriptionPlan, UserSubscription, UsageInfo, DynamicPrompt, DynamicPromptCreate, DynamicPromptUpdate, ProcessedDocument, DocumentProcessResult, CrmMetrics, ResumeItem, JobRequirementItem, ResumeMatchItem, ChatDocumentItem, ChatDocumentUploadResponse } from '../types';
 
-// const API_BASE_URL = 'https://9b3fe599ffc6.ngrok-free.app/';
+// const API_BASE_URL = 'https://18e2dccc9a31.ngrok-free.app';
 const API_BASE_URL = 'http://localhost:8000';
 
 class APIService {
@@ -18,6 +18,7 @@ class APIService {
       ...options,
       headers: {
         'Content-Type': 'application/json',
+        'ngrok-skip-browser-warnin': 'ngrok-skip-browser-warning',
         ...this.getAuthHeaders(),
         ...options.headers,
       },
@@ -403,6 +404,47 @@ class APIService {
   // CRM endpoints
   async getCrmMetrics(): Promise<CrmMetrics> {
     return this.request('/crm/metrics');
+  }
+
+  // Chat Document endpoints
+  async uploadChatDocument(file: File): Promise<ChatDocumentUploadResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(`${API_BASE_URL}/chat/upload-document`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Chat document upload failed');
+    }
+
+    return response.json();
+  }
+
+  async listChatDocuments(): Promise<ChatDocumentItem[]> {
+    return this.request('/chat/documents');
+  }
+
+  async activateChatDocument(docId: string): Promise<{ message: string; document_id: string }> {
+    return this.request(`/chat/documents/${docId}/activate`, {
+      method: 'POST',
+    });
+  }
+
+  async deactivateChatDocument(docId: string): Promise<{ message: string; document_id: string }> {
+    return this.request(`/chat/documents/${docId}/deactivate`, {
+      method: 'POST',
+    });
+  }
+
+  async deleteChatDocument(docId: string): Promise<{ message: string }> {
+    return this.request(`/chat/documents/${docId}`, {
+      method: 'DELETE',
+    });
   }
 
   // Resume matching endpoints

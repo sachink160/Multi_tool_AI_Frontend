@@ -245,3 +245,17 @@ export interface ResumeMatchItem {
   match_metadata?: string;
   created_at: string;
 }
+
+// Chat Document types
+export interface ChatDocumentItem {
+  id: string;
+  filename: string;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface ChatDocumentUploadResponse {
+  message: string;
+  document_id: string;
+  filename: string;
+}
