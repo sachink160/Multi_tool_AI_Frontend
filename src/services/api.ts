@@ -1,4 +1,4 @@
-import { AuthTokens, User, Document, HRDocument, ChatMessage, VideoFile, ProcessedFile, BackendChatHistory, UserProfile, SubscriptionPlan, UserSubscription, UsageInfo, DynamicPrompt, DynamicPromptCreate, DynamicPromptUpdate, ProcessedDocument, DocumentProcessResult, CrmMetrics, ResumeItem, JobRequirementItem, ResumeMatchItem, ChatDocumentItem, ChatDocumentUploadResponse } from '../types';
+import { AuthTokens, User, Document, HRDocument, ChatMessage, VideoFile, ProcessedFile, BackendChatHistory, UserProfile, SubscriptionPlan, UserSubscription, UsageInfo, DynamicPrompt, DynamicPromptCreate, DynamicPromptUpdate, ProcessedDocument, DocumentProcessResult, CrmMetrics, ResumeItem, JobRequirementItem, ResumeMatchItem, ChatDocumentItem, ChatDocumentUploadResponse, MasterSettings, MasterSettingsCreate, MasterSettingsUpdate } from '../types';
 
 // const API_BASE_URL = 'https://18e2dccc9a31.ngrok-free.app';
 const API_BASE_URL = 'http://localhost:8000';
@@ -547,6 +547,15 @@ class APIService {
     return response.blob();
   }
 
+  async getImageSubscriptionInfo(): Promise<{
+    can_use: boolean;
+    ai_images_generated: number;
+    max_ai_images: number;
+    remaining: number;
+  }> {
+    return this.request('/ai/images/subscription');
+  }
+
   async deleteImage(imageId: string): Promise<void> {
     const response = await fetch(`${API_BASE_URL}/ai/images/${imageId}`, {
       method: 'DELETE',
@@ -558,6 +567,53 @@ class APIService {
     }
     // No content expected (204)
     return;
+  }
+
+  // Master Settings endpoints
+  async createMasterSetting(setting: MasterSettingsCreate): Promise<MasterSettings> {
+    return this.request('/master-settings', {
+      method: 'POST',
+      body: JSON.stringify(setting),
+    });
+  }
+
+  async getMasterSettings(includeInactive: boolean = false): Promise<MasterSettings[]> {
+    const params = new URLSearchParams();
+    if (includeInactive) {
+      params.set('include_inactive', 'true');
+    }
+    const qs = params.toString();
+    return this.request(`/master-settings${qs ? `?${qs}` : ''}`);
+  }
+
+  async getMasterSetting(settingName: string): Promise<MasterSettings> {
+    return this.request(`/master-settings/${encodeURIComponent(settingName)}`);
+  }
+
+  async updateMasterSetting(settingName: string, update: MasterSettingsUpdate): Promise<MasterSettings> {
+    return this.request(`/master-settings/${encodeURIComponent(settingName)}`, {
+      method: 'PUT',
+      body: JSON.stringify(update),
+    });
+  }
+
+  async deleteMasterSetting(settingName: string): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/master-settings/${encodeURIComponent(settingName)}`, {
+      method: 'DELETE',
+      headers: this.getAuthHeaders(),
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Delete failed');
+    }
+    // No content expected (204)
+    return;
+  }
+
+  async activateMasterSetting(settingName: string): Promise<MasterSettings> {
+    return this.request(`/master-settings/${encodeURIComponent(settingName)}/activate`, {
+      method: 'POST',
+    });
   }
 }
 

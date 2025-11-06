@@ -12,7 +12,8 @@ import {
   Bot,
   CreditCard,
   Zap,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Settings
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import ThemeToggle from './ThemeToggle';
@@ -36,6 +37,7 @@ const Layout: React.FC<LayoutProps> = ({ children, currentPage, onPageChange }) 
     { name: 'Resume Matching', id: 'resume', icon: Users },
     { name: 'HR Tools', id: 'hr', icon: Users },
     { name: 'Video Processing', id: 'video', icon: Video },
+    { name: 'Master Settings', id: 'master-settings', icon: Settings },
     { name: 'Subscription', id: 'subscription', icon: CreditCard },
     { name: 'Profile', id: 'profile', icon: User },
   ];

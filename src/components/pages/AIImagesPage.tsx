@@ -1,7 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { apiService } from '../../services/api';
 import { ImageRecord } from '../../types';
-import { Download, Image as ImageIcon, Loader2, RefreshCw, Trash2 } from 'lucide-react';
+import { Download, Image as ImageIcon, Loader2, RefreshCw, Trash2, AlertCircle } from 'lucide-react';
+
+interface SubscriptionInfo {
+  can_use: boolean;
+  ai_images_generated: number;
+  max_ai_images: number;
+  remaining: number;
+}
 
 const AIImagesPage: React.FC = () => {
   const [prompt, setPrompt] = useState('');
@@ -13,16 +20,29 @@ const AIImagesPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [history, setHistory] = useState<ImageRecord[]>([]);
   const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
+  const [subscriptionInfo, setSubscriptionInfo] = useState<SubscriptionInfo | null>(null);
 
-  const canGenerate = useMemo(() => prompt.trim().length > 0 && !isLoading, [prompt, isLoading]);
+  const canGenerate = useMemo(() => {
+    return prompt.trim().length > 0 && !isLoading && (subscriptionInfo?.can_use ?? true);
+  }, [prompt, isLoading, subscriptionInfo]);
 
   const fetchHistory = async () => {
     const items = await apiService.listImageHistory();
     setHistory(items);
   };
 
+  const fetchSubscriptionInfo = async () => {
+    try {
+      const info = await apiService.getImageSubscriptionInfo();
+      setSubscriptionInfo(info);
+    } catch (e) {
+      console.error('Failed to fetch subscription info:', e);
+    }
+  };
+
   useEffect(() => {
     fetchHistory();
+    fetchSubscriptionInfo();
   }, []);
 
   // Build preview URLs from authorized downloads whenever history changes
@@ -73,6 +93,7 @@ const AIImagesPage: React.FC = () => {
         num_inference_steps: steps,
       });
       await fetchHistory();
+      await fetchSubscriptionInfo(); // Refresh subscription info after generation
       setPrompt('');
     } catch (e: any) {
       alert(e.message || 'Generation failed');
@@ -119,7 +140,47 @@ const AIImagesPage: React.FC = () => {
         <h1 className="text-2xl font-bold text-primary flex items-center gap-2">
           <ImageIcon className="w-6 h-6 text-primary" /> AI Images
         </h1>
-        <p className="text-secondary">Generate images with FLUX and view your history (3 images/month default).</p>
+        <p className="text-secondary">Generate images with FLUX and view your history.</p>
+        {subscriptionInfo && (
+          <div className={`mt-3 p-3 rounded-lg border ${
+            subscriptionInfo.remaining === 0 
+              ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' 
+              : subscriptionInfo.remaining <= 2
+              ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
+              : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+          }`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {subscriptionInfo.remaining === 0 && (
+                  <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
+                )}
+                <span className={`text-sm font-medium ${
+                  subscriptionInfo.remaining === 0 
+                    ? 'text-red-700 dark:text-red-300' 
+                    : subscriptionInfo.remaining <= 2
+                    ? 'text-yellow-700 dark:text-yellow-300'
+                    : 'text-blue-700 dark:text-blue-300'
+                }`}>
+                  Usage: {subscriptionInfo.ai_images_generated} / {subscriptionInfo.max_ai_images} images this month
+                </span>
+              </div>
+              <span className={`text-xs font-semibold ${
+                subscriptionInfo.remaining === 0 
+                  ? 'text-red-600 dark:text-red-400' 
+                  : subscriptionInfo.remaining <= 2
+                  ? 'text-yellow-600 dark:text-yellow-400'
+                  : 'text-blue-600 dark:text-blue-400'
+              }`}>
+                {subscriptionInfo.remaining} remaining
+              </span>
+            </div>
+            {subscriptionInfo.remaining === 0 && (
+              <p className="text-xs text-red-600 dark:text-red-400 mt-2">
+                You've reached your monthly limit. Upgrade your subscription to generate more images.
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -191,6 +252,7 @@ const AIImagesPage: React.FC = () => {
                   ? 'btn-primary' 
                   : 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed text-white'
               }`}
+              title={subscriptionInfo && !subscriptionInfo.can_use ? 'Monthly limit reached' : ''}
             >
               {isLoading ? (
                 <span className="flex items-center gap-2">
@@ -201,7 +263,10 @@ const AIImagesPage: React.FC = () => {
               )}
             </button>
             <button 
-              onClick={fetchHistory} 
+              onClick={() => {
+                fetchHistory();
+                fetchSubscriptionInfo();
+              }} 
               className="btn-secondary flex items-center gap-2"
             >
               <RefreshCw className="w-4 h-4" /> Refresh

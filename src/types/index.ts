@@ -275,3 +275,25 @@ export interface ImageRecord {
   status: string;
   error_message?: string;
 }
+
+// Master Settings types
+export interface MasterSettings {
+  id: string;
+  user_id: string;
+  name: string;
+  value: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MasterSettingsCreate {
+  name: string;
+  value: string;
+  is_active?: boolean;
+}
+
+export interface MasterSettingsUpdate {
+  value?: string;
+  is_active?: boolean;
+}

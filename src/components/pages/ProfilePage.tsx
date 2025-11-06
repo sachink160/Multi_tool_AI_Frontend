@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { User, Mail, Calendar, Settings, Activity, FileText, MessageSquare, Video, Users, CreditCard, Crown, Edit3 } from 'lucide-react';
+import { User, Mail, Calendar, Settings, Activity, FileText, MessageSquare, Video, Users, CreditCard, Crown, Edit3, LogOut } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiService } from '../../services/api';
 import { UserProfile, UsageInfo } from '../../types';
 import EditProfile from './EditProfile';
 
 const ProfilePage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [stats, setStats] = useState({
     documents: 0,
@@ -261,7 +261,7 @@ const ProfilePage: React.FC = () => {
       {/* Account Actions */}
       <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-lg p-6 border border-white/20 dark:border-gray-700/20">
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Account Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <button 
             onClick={() => setShowEditProfile(true)}
             className="flex items-center space-x-3 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
@@ -276,6 +276,13 @@ const ProfilePage: React.FC = () => {
           <button className="flex items-center space-x-3 p-4 bg-purple-50 dark:bg-purple-900/30 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors">
             <Mail className="h-5 w-5 text-purple-600 dark:text-purple-400" />
             <span className="text-sm font-medium text-gray-900 dark:text-white">Email Preferences</span>
+          </button>
+          <button 
+            onClick={logout}
+            className="flex items-center space-x-3 p-4 bg-red-50 dark:bg-red-900/30 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors"
+          >
+            <LogOut className="h-5 w-5 text-red-600 dark:text-red-400" />
+            <span className="text-sm font-medium text-gray-900 dark:text-white">Logout</span>
           </button>
         </div>
       </div>
