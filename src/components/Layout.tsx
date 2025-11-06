@@ -11,7 +11,8 @@ import {
   LogOut,
   Bot,
   CreditCard,
-  Zap
+  Zap,
+  Image as ImageIcon
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import ThemeToggle from './ThemeToggle';
@@ -31,6 +32,7 @@ const Layout: React.FC<LayoutProps> = ({ children, currentPage, onPageChange }) 
     { name: 'Document Q&A', id: 'documents', icon: FileText },
     { name: 'AI Chatbot', id: 'chatbot', icon: Bot },
     { name: 'Dynamic Prompts', id: 'dynamic-prompts', icon: Zap },
+    { name: 'AI Images', id: 'ai-images', icon: ImageIcon },
     { name: 'Resume Matching', id: 'resume', icon: Users },
     { name: 'HR Tools', id: 'hr', icon: Users },
     { name: 'Video Processing', id: 'video', icon: Video },

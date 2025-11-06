@@ -259,3 +259,19 @@ export interface ChatDocumentUploadResponse {
   document_id: string;
   filename: string;
 }
+
+// AI Images
+export interface ImageRecord {
+  id: string;
+  prompt: string;
+  negative_prompt?: string;
+  model: string;
+  guidance_scale: number;
+  num_inference_steps: number;
+  width: number;
+  height: number;
+  seed?: string;
+  output_path: string;
+  status: string;
+  error_message?: string;
+}

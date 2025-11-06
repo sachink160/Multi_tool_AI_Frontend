@@ -514,6 +514,51 @@ class APIService {
     const endpoint = `/resumes/matches${qs ? `?${qs}` : ''}`;
     return this.request(endpoint);
   }
+
+  // AI Images endpoints
+  async generateImage(payload: {
+    prompt: string;
+    negative_prompt?: string;
+    model?: string;
+    guidance_scale?: number;
+    num_inference_steps?: number;
+    width?: number;
+    height?: number;
+    seed?: number;
+  }): Promise<import('../types').ImageRecord> {
+    return this.request('/ai/images/generate', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async listImageHistory(): Promise<import('../types').ImageRecord[]> {
+    return this.request('/ai/images/history');
+  }
+
+  async downloadImage(imageId: string): Promise<Blob> {
+    const response = await fetch(`${API_BASE_URL}/ai/images/${imageId}/download`, {
+      headers: this.getAuthHeaders(),
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Download failed');
+    }
+    return response.blob();
+  }
+
+  async deleteImage(imageId: string): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/ai/images/${imageId}`, {
+      method: 'DELETE',
+      headers: this.getAuthHeaders(),
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Delete failed');
+    }
+    // No content expected (204)
+    return;
+  }
 }
 
 export const apiService = new APIService();

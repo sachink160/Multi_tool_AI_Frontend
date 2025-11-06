@@ -13,6 +13,7 @@ import VideoPage from './components/pages/VideoPage';
 import ProfilePage from './components/pages/ProfilePage';
 import SubscriptionPage from './components/pages/SubscriptionPage';
 import CRMPage from './components/pages/CRMPage';
+import AIImagesPage from './components/pages/AIImagesPage';
 
 const AppContent: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -57,6 +58,8 @@ const AppContent: React.FC = () => {
         return <HRPage />;
       case 'video':
         return <VideoPage />;
+      case 'ai-images':
+        return <AIImagesPage />;
       case 'profile':
         return <ProfilePage />;
       case 'subscription':
