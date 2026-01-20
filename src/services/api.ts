@@ -211,10 +211,13 @@ class APIService {
   async getChatHistory(): Promise<ChatMessage[]> {
     const backendHistory: BackendChatHistory[] = await this.request('/chat/history');
 
+    // Backend returns newest first, so reverse to get oldest first
+    const reversedHistory = [...backendHistory].reverse();
+
     // Transform backend format to frontend format
     const chatMessages: ChatMessage[] = [];
-    backendHistory.forEach((item, index) => {
-      // Add user message
+    reversedHistory.forEach((item, index) => {
+      // Add user message FIRST
       chatMessages.push({
         id: `user_${index}`,
         content: item.message,
@@ -222,7 +225,7 @@ class APIService {
         timestamp: item.timestamp
       });
 
-      // Add assistant response, including tool_used
+      // Add assistant response SECOND
       chatMessages.push({
         id: `assistant_${index}`,
         content: item.response,
@@ -232,8 +235,8 @@ class APIService {
       });
     });
 
-    // Reverse the array so the oldest messages are at the top, newest at the bottom
-    return chatMessages.reverse();
+    // Messages are now in correct order: oldest first, user before assistant
+    return chatMessages;
   }
 
   // Video processing endpoints
