@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Send, Bot, User, History, Trash2, MessageSquare, Upload, FileText, CheckCircle2, XCircle, Loader2, Trash } from 'lucide-react';
 import { apiService } from '../../services/api';
 import { ChatMessage, ChatDocumentItem } from '../../types';
+import MarkdownText from '../MarkdownText';
 
 const ChatbotPage: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -100,7 +101,7 @@ const ChatbotPage: React.FC = () => {
 
     try {
       const response = await apiService.chat(inputMessage);
-      
+
       const botMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         content: response.response,
@@ -131,8 +132,28 @@ const ChatbotPage: React.FC = () => {
     }
   };
 
-  const clearChat = () => {
-    setMessages([]);
+  const clearChat = async () => {
+    const userChoice = window.confirm(
+      "Choose how to clear chat:\n\n" +
+      "OK = Clear EVERYTHING (memory + history)\n" +
+      "Cancel = Clear UI only (keep chat history)"
+    );
+
+    if (userChoice) {
+      // User chose OK - clear everything
+      try {
+        const response = await apiService.clearAllChatData();
+        setMessages([]);
+        alert(`✅ ${response.message}\n\nCleared: Memory + Database History\nMessages deleted: ${response.messages_deleted}`);
+      } catch (error) {
+        console.error('Failed to clear all chat data:', error);
+        alert('❌ Failed to clear chat data. Please try again.');
+      }
+    } else {
+      // User chose Cancel - clear UI only
+      setMessages([]);
+      alert('✅ Chat UI cleared. Your history is preserved in the database.');
+    }
   };
 
   return (
@@ -190,13 +211,12 @@ const ChatbotPage: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 gap-3">
             {chatDocs.map((doc) => (
-              <div 
-                key={doc.id} 
-                className={`group flex items-center justify-between p-3 rounded-lg border transition-all ${
-                  doc.is_active 
-                    ? 'border-green-500 bg-green-50 dark:bg-green-900/20 dark:border-green-400' 
-                    : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 hover:border-gray-300 dark:hover:border-gray-600'
-                }`}
+              <div
+                key={doc.id}
+                className={`group flex items-center justify-between p-3 rounded-lg border transition-all ${doc.is_active
+                  ? 'border-green-500 bg-green-50 dark:bg-green-900/20 dark:border-green-400'
+                  : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 hover:border-gray-300 dark:hover:border-gray-600'
+                  }`}
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   {doc.is_active ? (
@@ -204,11 +224,10 @@ const ChatbotPage: React.FC = () => {
                   ) : (
                     <FileText className="h-5 w-5 text-gray-400 dark:text-gray-500 flex-shrink-0" />
                   )}
-                  <span className={`text-sm font-medium truncate ${
-                    doc.is_active 
-                      ? 'text-green-700 dark:text-green-300' 
-                      : 'text-gray-700 dark:text-gray-300'
-                  }`}>
+                  <span className={`text-sm font-medium truncate ${doc.is_active
+                    ? 'text-green-700 dark:text-green-300'
+                    : 'text-gray-700 dark:text-gray-300'
+                    }`}>
                     {doc.filename}
                   </span>
                   {doc.is_active && (
@@ -219,22 +238,22 @@ const ChatbotPage: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2 ml-3">
                   {doc.is_active ? (
-                    <button 
-                      onClick={() => handleDeactivateDoc(doc.id)} 
+                    <button
+                      onClick={() => handleDeactivateDoc(doc.id)}
                       className="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
                     >
                       Deactivate
                     </button>
                   ) : (
-                    <button 
-                      onClick={() => handleActivateDoc(doc.id)} 
+                    <button
+                      onClick={() => handleActivateDoc(doc.id)}
                       className="px-3 py-1.5 text-xs font-medium text-blue-700 dark:text-blue-300 hover:text-blue-900 dark:hover:text-blue-200 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded transition-colors"
                     >
                       Activate
                     </button>
                   )}
-                  <button 
-                    onClick={() => handleDeleteDoc(doc.id)} 
+                  <button
+                    onClick={() => handleDeleteDoc(doc.id)}
                     className="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
                     title="Delete document"
                   >
@@ -266,11 +285,10 @@ const ChatbotPage: React.FC = () => {
                 className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
-                    message.sender === 'user'
-                      ? 'bg-blue-600 dark:bg-blue-500 text-white'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
-                  }`}
+                  className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${message.sender === 'user'
+                    ? 'bg-blue-600 dark:bg-blue-500 text-white'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                    }`}
                 >
                   <div className="flex items-start space-x-2">
                     {message.sender === 'assistant' && (
@@ -280,13 +298,16 @@ const ChatbotPage: React.FC = () => {
                       <User className="h-5 w-5 text-blue-100 mt-0.5 flex-shrink-0" />
                     )}
                     <div className="flex-1">
-                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                      {message.sender === 'assistant' ? (
+                        <MarkdownText content={message.content} className="text-sm" />
+                      ) : (
+                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                      )}
                       {message.sender === 'assistant' && message.tool_used && (
                         <span className="text-xs text-gray-400 dark:text-gray-500">Tool used: {message.tool_used}</span>
                       )}
-                      <p className={`text-xs mt-1 ${
-                        message.sender === 'user' ? 'text-blue-100' : 'text-gray-500 dark:text-gray-400'
-                      }`}>
+                      <p className={`text-xs mt-1 ${message.sender === 'user' ? 'text-blue-100' : 'text-gray-500 dark:text-gray-400'
+                        }`}>
                         {new Date(message.timestamp).toLocaleTimeString()}
                       </p>
                     </div>
@@ -295,7 +316,7 @@ const ChatbotPage: React.FC = () => {
               </div>
             ))
           )}
-          
+
           {/* Typing Indicator */}
           {isTyping && (
             <div className="flex justify-start">
@@ -311,7 +332,7 @@ const ChatbotPage: React.FC = () => {
               </div>
             </div>
           )}
-          
+
           <div ref={messagesEndRef} />
         </div>
 

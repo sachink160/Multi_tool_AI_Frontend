@@ -210,7 +210,7 @@ class APIService {
 
   async getChatHistory(): Promise<ChatMessage[]> {
     const backendHistory: BackendChatHistory[] = await this.request('/chat/history');
-    
+
     // Transform backend format to frontend format
     const chatMessages: ChatMessage[] = [];
     backendHistory.forEach((item, index) => {
@@ -221,7 +221,7 @@ class APIService {
         sender: 'user',
         timestamp: item.timestamp
       });
-      
+
       // Add assistant response, including tool_used
       chatMessages.push({
         id: `assistant_${index}`,
@@ -231,7 +231,7 @@ class APIService {
         tool_used: item.tool_used
       });
     });
-    
+
     // Reverse the array so the oldest messages are at the top, newest at the bottom
     return chatMessages.reverse();
   }
@@ -256,8 +256,8 @@ class APIService {
   }
 
   async getUploadedVideos(): Promise<VideoFile[]> {
-  const res = await this.request<{ uploads?: string[] }>('/video-to-audio/uploads');
-  // res.uploads is an array of filenames
+    const res = await this.request<{ uploads?: string[] }>('/video-to-audio/uploads');
+    // res.uploads is an array of filenames
     // We'll fake the upload_date and size since backend doesn't provide them
     return (res.uploads || []).map((filename: string) => ({
       filename,
@@ -267,8 +267,8 @@ class APIService {
   }
 
   async getProcessedFiles(): Promise<ProcessedFile[]> {
-  const res = await this.request<{ processed?: string[] }>('/video-to-audio/processed');
-  // res.processed is an array of filenames
+    const res = await this.request<{ processed?: string[] }>('/video-to-audio/processed');
+    // res.processed is an array of filenames
     // We'll infer type from extension and fake processed_date/size
     return (res.processed || []).map((filename: string) => ({
       filename,
@@ -443,6 +443,18 @@ class APIService {
 
   async deleteChatDocument(docId: string): Promise<{ message: string }> {
     return this.request(`/chat/documents/${docId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async clearChatMemory(): Promise<{ message: string; cleared: string; history_preserved: boolean }> {
+    return this.request('/chat/clear-memory', {
+      method: 'DELETE',
+    });
+  }
+
+  async clearAllChatData(): Promise<{ message: string; cleared: string; messages_deleted: number; history_preserved: boolean }> {
+    return this.request('/chat/clear-all', {
       method: 'DELETE',
     });
   }
